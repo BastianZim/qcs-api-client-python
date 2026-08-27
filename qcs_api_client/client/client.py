@@ -1,27 +1,20 @@
 from contextlib import asynccontextmanager, contextmanager
-from typing import Optional
 
 import httpx
+from qcs_api_client_common.configuration import ClientConfiguration
 
-from ._configuration import QCSClientConfiguration
-from .auth import QCSAuth, QCSAuthConfiguration
+from .auth import QCSAuth
 
 
 def _build_client_kwargs(
-    *, configuration: Optional[QCSClientConfiguration] = None, kwarg_overrides: Optional[dict] = None
+    *, configuration: ClientConfiguration | None = None, kwarg_overrides: dict | None = None
 ) -> dict:
     """
     Return kwargs used for construction of an httpx.BaseClient.
     """
-    configuration = configuration or QCSClientConfiguration.load()
-    auth_configuration = QCSAuthConfiguration(
-        auth_server=configuration.auth_server,
-    )
-    auth = QCSAuth(
-        client_configuration=configuration,
-        auth_configuration=auth_configuration,
-    )
-    kwargs = dict(auth=auth, base_url=str(configuration.profile.api_url))
+    configuration = configuration or ClientConfiguration.load_default()
+    auth = QCSAuth(client_configuration=configuration)
+    kwargs = dict(auth=auth, base_url=str(configuration.api_url))
 
     if kwarg_overrides is not None:
         kwargs.update(kwarg_overrides)
@@ -31,7 +24,7 @@ def _build_client_kwargs(
 
 @contextmanager
 def build_sync_client(
-    *, configuration: Optional[QCSClientConfiguration] = None, client_kwargs: Optional[dict] = None
+    *, configuration: ClientConfiguration | None = None, client_kwargs: dict | None = None
 ) -> httpx.Client:
     """
     Yield a client object suitable for use with the qcs_api_client.sync API functions.
@@ -42,7 +35,9 @@ def build_sync_client(
 
 @asynccontextmanager
 async def build_async_client(
-    *, configuration: Optional[QCSClientConfiguration] = None, client_kwargs: Optional[dict] = None
+    *,
+    configuration: ClientConfiguration | None = None,
+    client_kwargs: dict | None = None,
 ) -> httpx.AsyncClient:
     """
     Yield a client object suitable for use with the qcs_api_client.asyncio API functions.

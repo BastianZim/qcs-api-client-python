@@ -1,22 +1,16 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional
+from __future__ import annotations
 
-from typing import List
-
+from collections.abc import Callable, Mapping
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.billing_price_recurrence_aggregate_usage import BillingPriceRecurrenceAggregateUsage
+from ..models.billing_price_recurrence_interval import BillingPriceRecurrenceInterval
+from ..models.billing_price_recurrence_usage_type import BillingPriceRecurrenceUsageType
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from ..models.billing_price_recurrence_usage_type import BillingPriceRecurrenceUsageType
-from ..models.billing_price_recurrence_aggregate_usage import (
-    BillingPriceRecurrenceAggregateUsage,
-)
-from typing import Union
-from ..models.billing_price_recurrence_interval import BillingPriceRecurrenceInterval
-
 
 T = TypeVar("T", bound="BillingPriceRecurrence")
 
@@ -29,39 +23,39 @@ class BillingPriceRecurrence:
         Attributes:
             interval (BillingPriceRecurrenceInterval): The frequency at which recurring usage should be billed.
                 Using `month` is recommended.
-            aggregate_usage (Union[Unset, BillingPriceRecurrenceAggregateUsage]): How to determine the aggregate usage over
-                the `interval` when
+            aggregate_usage (BillingPriceRecurrenceAggregateUsage | Unset): How to determine the aggregate usage over the
+                `interval` when
                 `usageType=metered`.
                 Using `sum` is recommended.
-            interval_count (Union[Unset, int]): The number of `interval` units between each billing cycle.
+            interval_count (int | Unset): The number of `interval` units between each billing cycle.
                 For example, `interval=month` and `intervalCount=1` means every month
                 (recommended).
-            usage_type (Union[Unset, BillingPriceRecurrenceUsageType]): Use `metered` to calculate a dynamic quantity based
-                on reported
+            usage_type (BillingPriceRecurrenceUsageType | Unset): Use `metered` to calculate a dynamic quantity based on
+                reported
                 usage records (recommended).
                 Use `licensed` when you provide a fixed quantity, e.g. a TV subscription.
     """
 
     interval: BillingPriceRecurrenceInterval
-    aggregate_usage: Union[Unset, BillingPriceRecurrenceAggregateUsage] = UNSET
-    interval_count: Union[Unset, int] = UNSET
-    usage_type: Union[Unset, BillingPriceRecurrenceUsageType] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    aggregate_usage: BillingPriceRecurrenceAggregateUsage | Unset = UNSET
+    interval_count: int | Unset = UNSET
+    usage_type: BillingPriceRecurrenceUsageType | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         interval = self.interval.value
 
-        aggregate_usage: Union[Unset, str] = UNSET
+        aggregate_usage: str | Unset = UNSET
         if not isinstance(self.aggregate_usage, Unset):
             aggregate_usage = self.aggregate_usage.value
 
         interval_count = self.interval_count
 
-        usage_type: Union[Unset, str] = UNSET
+        usage_type: str | Unset = UNSET
         if not isinstance(self.usage_type, Unset):
             usage_type = self.usage_type.value
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -75,19 +69,20 @@ class BillingPriceRecurrence:
         if usage_type is not UNSET:
             field_dict["usageType"] = usage_type
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         interval = BillingPriceRecurrenceInterval(d.pop("interval"))
 
         _aggregate_usage = d.pop("aggregateUsage", UNSET)
-        aggregate_usage: Union[Unset, BillingPriceRecurrenceAggregateUsage]
+        aggregate_usage: BillingPriceRecurrenceAggregateUsage | Unset
         if isinstance(_aggregate_usage, Unset):
             aggregate_usage = UNSET
         else:
@@ -96,7 +91,7 @@ class BillingPriceRecurrence:
         interval_count = d.pop("intervalCount", UNSET)
 
         _usage_type = d.pop("usageType", UNSET)
-        usage_type: Union[Unset, BillingPriceRecurrenceUsageType]
+        usage_type: BillingPriceRecurrenceUsageType | Unset
         if isinstance(_usage_type, Unset):
             usage_type = UNSET
         else:
@@ -113,7 +108,7 @@ class BillingPriceRecurrence:
         return billing_price_recurrence
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

@@ -1,16 +1,13 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional, TYPE_CHECKING
+from __future__ import annotations
 
-from typing import List
-
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from typing import Union
 
 if TYPE_CHECKING:
     from ..models.validation_error import ValidationError
@@ -26,30 +23,30 @@ class Error:
         code (str):
         message (str):
         request_id (str):
-        validation_errors (Union[Unset, List['ValidationError']]):
+        validation_errors (list[ValidationError] | Unset):
     """
 
     code: str
     message: str
     request_id: str
-    validation_errors: Union[Unset, List["ValidationError"]] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    validation_errors: list[ValidationError] | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         code = self.code
 
         message = self.message
 
         request_id = self.request_id
 
-        validation_errors: Union[Unset, List[Dict[str, Any]]] = UNSET
+        validation_errors: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.validation_errors, Unset):
             validation_errors = []
             for validation_errors_item_data in self.validation_errors:
                 validation_errors_item = validation_errors_item_data.to_dict()
                 validation_errors.append(validation_errors_item)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -61,29 +58,32 @@ class Error:
         if validation_errors is not UNSET:
             field_dict["validationErrors"] = validation_errors
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.validation_error import ValidationError
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         code = d.pop("code")
 
         message = d.pop("message")
 
         request_id = d.pop("requestId")
 
-        validation_errors = []
         _validation_errors = d.pop("validationErrors", UNSET)
-        for validation_errors_item_data in _validation_errors or []:
-            validation_errors_item = ValidationError.from_dict(validation_errors_item_data)
+        validation_errors: list[ValidationError] | Unset = UNSET
+        if _validation_errors is not UNSET:
+            validation_errors = []
+            for validation_errors_item_data in _validation_errors:
+                validation_errors_item = ValidationError.from_dict(validation_errors_item_data)
 
-            validation_errors.append(validation_errors_item)
+                validation_errors.append(validation_errors_item)
 
         error = cls(
             code=code,
@@ -96,7 +96,7 @@ class Error:
         return error
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

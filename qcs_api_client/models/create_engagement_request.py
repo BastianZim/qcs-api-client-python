@@ -1,19 +1,14 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional
+from __future__ import annotations
 
-from typing import List
-
+from collections.abc import Callable, Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.account_type import AccountType
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from typing import Union
-from ..models.account_type import AccountType
-from typing import cast
-
 
 T = TypeVar("T", bound="CreateEngagementRequest")
 
@@ -22,28 +17,27 @@ T = TypeVar("T", bound="CreateEngagementRequest")
 class CreateEngagementRequest:
     """
     Attributes:
-        account_id (Union[Unset, str]): Either the client's user ID or the name of a group on behalf of which the client
+        account_id (str | Unset): Either the client's user ID or the name of a group on behalf of which the client
             wishes to engage. This value will override any values set in the headers.
-        account_type (Union[Unset, AccountType]): There are two types of accounts within QCS: user (representing a
-            single user in Okta) and group
-            (representing one or more users in Okta).
-        endpoint_id (Union[Unset, str]): Unique, opaque identifier for the endpoint
-        quantum_processor_id (Union[Unset, str]): Public identifier for a quantum processor [example: Aspen-1]
-        tags (Union[Unset, List[str]]): Tags recorded on QPU requests, which reporting services may later use for
-            querying usage records.
+        account_type (AccountType | Unset): There are two types of accounts within QCS: user (representing a single user
+            in Okta) and group (representing one or more users in Okta).
+        endpoint_id (str | Unset): Unique, opaque identifier for the endpoint
+        quantum_processor_id (str | Unset): Public identifier for a quantum processor [example: Aspen-1]
+        tags (list[str] | Unset): Tags recorded on QPU requests, which reporting services may later use for querying
+            usage records.
     """
 
-    account_id: Union[Unset, str] = UNSET
-    account_type: Union[Unset, AccountType] = UNSET
-    endpoint_id: Union[Unset, str] = UNSET
-    quantum_processor_id: Union[Unset, str] = UNSET
-    tags: Union[Unset, List[str]] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    account_id: str | Unset = UNSET
+    account_type: AccountType | Unset = UNSET
+    endpoint_id: str | Unset = UNSET
+    quantum_processor_id: str | Unset = UNSET
+    tags: list[str] | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         account_id = self.account_id
 
-        account_type: Union[Unset, str] = UNSET
+        account_type: str | Unset = UNSET
         if not isinstance(self.account_type, Unset):
             account_type = self.account_type.value
 
@@ -51,11 +45,11 @@ class CreateEngagementRequest:
 
         quantum_processor_id = self.quantum_processor_id
 
-        tags: Union[Unset, List[str]] = UNSET
+        tags: list[str] | Unset = UNSET
         if not isinstance(self.tags, Unset):
             tags = self.tags
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if account_id is not UNSET:
@@ -69,19 +63,20 @@ class CreateEngagementRequest:
         if tags is not UNSET:
             field_dict["tags"] = tags
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         account_id = d.pop("accountId", UNSET)
 
         _account_type = d.pop("accountType", UNSET)
-        account_type: Union[Unset, AccountType]
+        account_type: AccountType | Unset
         if isinstance(_account_type, Unset):
             account_type = UNSET
         else:
@@ -91,7 +86,7 @@ class CreateEngagementRequest:
 
         quantum_processor_id = d.pop("quantumProcessorId", UNSET)
 
-        tags = cast(List[str], d.pop("tags", UNSET))
+        tags = cast(list[str], d.pop("tags", UNSET))
 
         create_engagement_request = cls(
             account_id=account_id,
@@ -105,7 +100,7 @@ class CreateEngagementRequest:
         return create_engagement_request
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

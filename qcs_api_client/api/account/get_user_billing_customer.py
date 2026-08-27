@@ -1,40 +1,43 @@
-from http import HTTPStatus
-from typing import Any, Dict, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 from tenacity import retry
 
-from ...types import Response
-from ...util.errors import raise_for_status
-from ...util.retry import DEFAULT_RETRY_ARGUMENTS
-
 from ...models.billing_customer import BillingCustomer
 from ...models.error import Error
+from ...types import Response
+from ...util.errors import QCSHTTPStatusError
+from ...util.retry import DEFAULT_RETRY_ARGUMENTS
 
 
 def _get_kwargs(
     user_id: str,
-) -> Dict[str, Any]:
-    _kwargs: Dict[str, Any] = {
+) -> dict[str, Any]:
+
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/v1/users/{user_id}/billingCustomer".format(
-            user_id=user_id,
+            user_id=quote(str(user_id), safe=""),
         ),
     }
 
     return _kwargs
 
 
-def _parse_response(*, response: httpx.Response) -> Union[BillingCustomer, Error]:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, response: httpx.Response) -> BillingCustomer | Error | None:
+    if response.status_code == 200:
         response_200 = BillingCustomer.from_dict(response.json())
 
         return response_200
-    else:
-        raise_for_status(response)
+
+    raise QCSHTTPStatusError(
+        message=f"Unexpected response: status code {response.status_code}",
+        response=response,
+    )
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[BillingCustomer, Error]]:
+def _build_response(*, response: httpx.Response) -> Response[BillingCustomer | Error]:
     """Construct the Response class from the raw ``httpx.Response``."""
     return Response.build_from_httpx_response(response=response, parse_function=_parse_response)
 
@@ -44,8 +47,8 @@ def sync(
     user_id: str,
     *,
     client: httpx.Client,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[BillingCustomer, Error]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[BillingCustomer | Error]:
     """Retrieve billing customer for a QCS user account.
 
     Args:
@@ -56,8 +59,10 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[BillingCustomer, Error]]
+        Response[BillingCustomer | Error]
     """
+
+    httpx_request_kwargs = httpx_request_kwargs or {}
 
     kwargs = _get_kwargs(
         user_id=user_id,
@@ -75,8 +80,10 @@ def sync_from_dict(
     user_id: str,
     *,
     client: httpx.Client,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[BillingCustomer, Error]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[BillingCustomer | Error]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         user_id=user_id,
         client=client,
@@ -93,8 +100,8 @@ async def asyncio(
     user_id: str,
     *,
     client: httpx.AsyncClient,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[BillingCustomer, Error]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[BillingCustomer | Error]:
     """Retrieve billing customer for a QCS user account.
 
     Args:
@@ -105,9 +112,10 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[BillingCustomer, Error]]
+        Response[BillingCustomer | Error]
     """
 
+    httpx_request_kwargs = httpx_request_kwargs or {}
     kwargs = _get_kwargs(
         user_id=user_id,
     )
@@ -121,8 +129,10 @@ async def asyncio_from_dict(
     user_id: str,
     *,
     client: httpx.AsyncClient,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[BillingCustomer, Error]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[BillingCustomer | Error]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         user_id=user_id,
         client=client,

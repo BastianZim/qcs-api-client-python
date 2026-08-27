@@ -1,38 +1,35 @@
-from http import HTTPStatus
-from typing import Any, Dict, Union
+from typing import Any
 
 import httpx
 from tenacity import retry
 
-from ...types import Response, UNSET
-from ...util.errors import raise_for_status
-from ...util.retry import DEFAULT_RETRY_ARGUMENTS
-
-from ...models.list_reservations_show_deleted import ListReservationsShowDeleted
 from ...models.account_type import AccountType
-from ...models.list_reservations_response import ListReservationsResponse
-from ...types import Unset
 from ...models.error import Error
+from ...models.list_reservations_response import ListReservationsResponse
+from ...models.list_reservations_show_deleted import ListReservationsShowDeleted
+from ...types import UNSET, Response, Unset
+from ...util.errors import QCSHTTPStatusError
+from ...util.retry import DEFAULT_RETRY_ARGUMENTS
 
 
 def _get_kwargs(
     *,
-    filter_: Union[Unset, str] = UNSET,
-    order: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    show_deleted: Union[Unset, ListReservationsShowDeleted] = ListReservationsShowDeleted.FALSE,
-    x_qcs_account_id: Union[Unset, str] = UNSET,
-    x_qcs_account_type: Union[Unset, AccountType] = UNSET,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+    filter_: str | Unset = UNSET,
+    order: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    show_deleted: ListReservationsShowDeleted | Unset = ListReservationsShowDeleted.FALSE,
+    x_qcs_account_id: str | Unset = UNSET,
+    x_qcs_account_type: AccountType | Unset = UNSET,
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
     if not isinstance(x_qcs_account_id, Unset):
         headers["X-QCS-ACCOUNT-ID"] = x_qcs_account_id
 
     if not isinstance(x_qcs_account_type, Unset):
         headers["X-QCS-ACCOUNT-TYPE"] = str(x_qcs_account_type)
 
-    params: Dict[str, Any] = {}
+    params: dict[str, Any] = {}
 
     params["filter"] = filter_
 
@@ -42,7 +39,7 @@ def _get_kwargs(
 
     params["pageToken"] = page_token
 
-    json_show_deleted: Union[Unset, str] = UNSET
+    json_show_deleted: str | Unset = UNSET
     if not isinstance(show_deleted, Unset):
         json_show_deleted = show_deleted.value
 
@@ -50,7 +47,7 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/v1/reservations",
         "params": params,
@@ -60,16 +57,19 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, response: httpx.Response) -> Union[Error, ListReservationsResponse]:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, response: httpx.Response) -> Error | ListReservationsResponse | None:
+    if response.status_code == 200:
         response_200 = ListReservationsResponse.from_dict(response.json())
 
         return response_200
-    else:
-        raise_for_status(response)
+
+    raise QCSHTTPStatusError(
+        message=f"Unexpected response: status code {response.status_code}",
+        response=response,
+    )
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[Error, ListReservationsResponse]]:
+def _build_response(*, response: httpx.Response) -> Response[Error | ListReservationsResponse]:
     """Construct the Response class from the raw ``httpx.Response``."""
     return Response.build_from_httpx_response(response=response, parse_function=_parse_response)
 
@@ -78,15 +78,15 @@ def _build_response(*, response: httpx.Response) -> Response[Union[Error, ListRe
 def sync(
     *,
     client: httpx.Client,
-    filter_: Union[Unset, str] = UNSET,
-    order: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    show_deleted: Union[Unset, ListReservationsShowDeleted] = ListReservationsShowDeleted.FALSE,
-    x_qcs_account_id: Union[Unset, str] = UNSET,
-    x_qcs_account_type: Union[Unset, AccountType] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListReservationsResponse]]:
+    filter_: str | Unset = UNSET,
+    order: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    show_deleted: ListReservationsShowDeleted | Unset = ListReservationsShowDeleted.FALSE,
+    x_qcs_account_id: str | Unset = UNSET,
+    x_qcs_account_type: AccountType | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListReservationsResponse]:
     """List Reservations
 
      List existing reservations for the authenticated user,
@@ -110,8 +110,8 @@ def sync(
     * `price` - integer
 
     Args:
-        filter_ (Union[Unset, str]): A string conforming to a *limited* set of the filtering
-            operations described in [Google AIP 160](https://google.aip.dev/160).
+        filter_ (str | Unset): A string conforming to a *limited* set of the filtering operations
+            described in [Google AIP 160](https://google.aip.dev/160).
 
             * Expressions are always of the form `{field} {operator} {value}` and may be grouped with
             `()` and joined with `AND` or `OR`.
@@ -129,7 +129,7 @@ def sync(
 
             For example, `startTime >= "2020-06-24T22:00:00.000Z" OR (duration >= "15m" AND endTime <
             "2020-06-24T22:00:00.000Z")`.
-        order (Union[Unset, str]): A string conforming to order specification described in [Google
+        order (str | Unset): A string conforming to order specification described in [Google
             AIP 132](https://google.aip.dev/132#ordering).
 
             * Fields are specific to the route in question, but are typically a subset
@@ -138,23 +138,24 @@ def sync(
             * Fields are sorted in *ascending* order unless the field is followed by `DESC`.
 
             For example, `quantumProcessorId, startTime DESC`.
-        page_size (Union[Unset, int]):
-        page_token (Union[Unset, str]):
-        show_deleted (Union[Unset, ListReservationsShowDeleted]):  Default:
+        page_size (int | Unset):
+        page_token (str | Unset):
+        show_deleted (ListReservationsShowDeleted | Unset):  Default:
             ListReservationsShowDeleted.FALSE.
-        x_qcs_account_id (Union[Unset, str]): userId for `accountType` "user", group name for
+        x_qcs_account_id (str | Unset): userId for `accountType` "user", group name for
             `accountType` "group".
-        x_qcs_account_type (Union[Unset, AccountType]): There are two types of accounts within
-            QCS: user (representing a single user in Okta) and group
-            (representing one or more users in Okta).
+        x_qcs_account_type (AccountType | Unset): There are two types of accounts within QCS: user
+            (representing a single user in Okta) and group (representing one or more users in Okta).
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, ListReservationsResponse]]
+        Response[Error | ListReservationsResponse]
     """
+
+    httpx_request_kwargs = httpx_request_kwargs or {}
 
     kwargs = _get_kwargs(
         filter_=filter_,
@@ -177,15 +178,17 @@ def sync(
 def sync_from_dict(
     *,
     client: httpx.Client,
-    filter_: Union[Unset, str] = UNSET,
-    order: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    show_deleted: Union[Unset, ListReservationsShowDeleted] = ListReservationsShowDeleted.FALSE,
-    x_qcs_account_id: Union[Unset, str] = UNSET,
-    x_qcs_account_type: Union[Unset, AccountType] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListReservationsResponse]]:
+    filter_: str | Unset = UNSET,
+    order: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    show_deleted: ListReservationsShowDeleted | Unset = ListReservationsShowDeleted.FALSE,
+    x_qcs_account_id: str | Unset = UNSET,
+    x_qcs_account_type: AccountType | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListReservationsResponse]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         client=client,
         filter_=filter_,
@@ -207,15 +210,15 @@ def sync_from_dict(
 async def asyncio(
     *,
     client: httpx.AsyncClient,
-    filter_: Union[Unset, str] = UNSET,
-    order: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    show_deleted: Union[Unset, ListReservationsShowDeleted] = ListReservationsShowDeleted.FALSE,
-    x_qcs_account_id: Union[Unset, str] = UNSET,
-    x_qcs_account_type: Union[Unset, AccountType] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListReservationsResponse]]:
+    filter_: str | Unset = UNSET,
+    order: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    show_deleted: ListReservationsShowDeleted | Unset = ListReservationsShowDeleted.FALSE,
+    x_qcs_account_id: str | Unset = UNSET,
+    x_qcs_account_type: AccountType | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListReservationsResponse]:
     """List Reservations
 
      List existing reservations for the authenticated user,
@@ -239,8 +242,8 @@ async def asyncio(
     * `price` - integer
 
     Args:
-        filter_ (Union[Unset, str]): A string conforming to a *limited* set of the filtering
-            operations described in [Google AIP 160](https://google.aip.dev/160).
+        filter_ (str | Unset): A string conforming to a *limited* set of the filtering operations
+            described in [Google AIP 160](https://google.aip.dev/160).
 
             * Expressions are always of the form `{field} {operator} {value}` and may be grouped with
             `()` and joined with `AND` or `OR`.
@@ -258,7 +261,7 @@ async def asyncio(
 
             For example, `startTime >= "2020-06-24T22:00:00.000Z" OR (duration >= "15m" AND endTime <
             "2020-06-24T22:00:00.000Z")`.
-        order (Union[Unset, str]): A string conforming to order specification described in [Google
+        order (str | Unset): A string conforming to order specification described in [Google
             AIP 132](https://google.aip.dev/132#ordering).
 
             * Fields are specific to the route in question, but are typically a subset
@@ -267,24 +270,24 @@ async def asyncio(
             * Fields are sorted in *ascending* order unless the field is followed by `DESC`.
 
             For example, `quantumProcessorId, startTime DESC`.
-        page_size (Union[Unset, int]):
-        page_token (Union[Unset, str]):
-        show_deleted (Union[Unset, ListReservationsShowDeleted]):  Default:
+        page_size (int | Unset):
+        page_token (str | Unset):
+        show_deleted (ListReservationsShowDeleted | Unset):  Default:
             ListReservationsShowDeleted.FALSE.
-        x_qcs_account_id (Union[Unset, str]): userId for `accountType` "user", group name for
+        x_qcs_account_id (str | Unset): userId for `accountType` "user", group name for
             `accountType` "group".
-        x_qcs_account_type (Union[Unset, AccountType]): There are two types of accounts within
-            QCS: user (representing a single user in Okta) and group
-            (representing one or more users in Okta).
+        x_qcs_account_type (AccountType | Unset): There are two types of accounts within QCS: user
+            (representing a single user in Okta) and group (representing one or more users in Okta).
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, ListReservationsResponse]]
+        Response[Error | ListReservationsResponse]
     """
 
+    httpx_request_kwargs = httpx_request_kwargs or {}
     kwargs = _get_kwargs(
         filter_=filter_,
         order=order,
@@ -303,15 +306,17 @@ async def asyncio(
 async def asyncio_from_dict(
     *,
     client: httpx.AsyncClient,
-    filter_: Union[Unset, str] = UNSET,
-    order: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    show_deleted: Union[Unset, ListReservationsShowDeleted] = ListReservationsShowDeleted.FALSE,
-    x_qcs_account_id: Union[Unset, str] = UNSET,
-    x_qcs_account_type: Union[Unset, AccountType] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListReservationsResponse]]:
+    filter_: str | Unset = UNSET,
+    order: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    show_deleted: ListReservationsShowDeleted | Unset = ListReservationsShowDeleted.FALSE,
+    x_qcs_account_id: str | Unset = UNSET,
+    x_qcs_account_type: AccountType | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListReservationsResponse]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         client=client,
         filter_=filter_,

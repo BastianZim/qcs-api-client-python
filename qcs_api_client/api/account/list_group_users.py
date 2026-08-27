@@ -1,25 +1,24 @@
-from http import HTTPStatus
-from typing import Any, Dict, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 from tenacity import retry
 
-from ...types import Response, UNSET
-from ...util.errors import raise_for_status
-from ...util.retry import DEFAULT_RETRY_ARGUMENTS
-
-from ...types import Unset
 from ...models.error import Error
 from ...models.list_group_users_response import ListGroupUsersResponse
+from ...types import UNSET, Response, Unset
+from ...util.errors import QCSHTTPStatusError
+from ...util.retry import DEFAULT_RETRY_ARGUMENTS
 
 
 def _get_kwargs(
     group_name: str,
     *,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-) -> Dict[str, Any]:
-    params: Dict[str, Any] = {}
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
 
     params["pageSize"] = page_size
 
@@ -27,10 +26,10 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/v1/groups/{group_name}/users".format(
-            group_name=group_name,
+            group_name=quote(str(group_name), safe=""),
         ),
         "params": params,
     }
@@ -38,16 +37,19 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, response: httpx.Response) -> Union[Error, ListGroupUsersResponse]:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, response: httpx.Response) -> Error | ListGroupUsersResponse | None:
+    if response.status_code == 200:
         response_200 = ListGroupUsersResponse.from_dict(response.json())
 
         return response_200
-    else:
-        raise_for_status(response)
+
+    raise QCSHTTPStatusError(
+        message=f"Unexpected response: status code {response.status_code}",
+        response=response,
+    )
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[Error, ListGroupUsersResponse]]:
+def _build_response(*, response: httpx.Response) -> Response[Error | ListGroupUsersResponse]:
     """Construct the Response class from the raw ``httpx.Response``."""
     return Response.build_from_httpx_response(response=response, parse_function=_parse_response)
 
@@ -57,10 +59,10 @@ def sync(
     group_name: str,
     *,
     client: httpx.Client,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListGroupUsersResponse]]:
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListGroupUsersResponse]:
     """List users belonging to a group
 
      List users belonging to a group. Note, group membership may take several minutes to update within
@@ -69,16 +71,18 @@ def sync(
 
     Args:
         group_name (str):
-        page_size (Union[Unset, int]):
-        page_token (Union[Unset, str]):
+        page_size (int | Unset):
+        page_token (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, ListGroupUsersResponse]]
+        Response[Error | ListGroupUsersResponse]
     """
+
+    httpx_request_kwargs = httpx_request_kwargs or {}
 
     kwargs = _get_kwargs(
         group_name=group_name,
@@ -98,10 +102,12 @@ def sync_from_dict(
     group_name: str,
     *,
     client: httpx.Client,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListGroupUsersResponse]]:
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListGroupUsersResponse]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         group_name=group_name,
         client=client,
@@ -120,10 +126,10 @@ async def asyncio(
     group_name: str,
     *,
     client: httpx.AsyncClient,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListGroupUsersResponse]]:
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListGroupUsersResponse]:
     """List users belonging to a group
 
      List users belonging to a group. Note, group membership may take several minutes to update within
@@ -132,17 +138,18 @@ async def asyncio(
 
     Args:
         group_name (str):
-        page_size (Union[Unset, int]):
-        page_token (Union[Unset, str]):
+        page_size (int | Unset):
+        page_token (str | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, ListGroupUsersResponse]]
+        Response[Error | ListGroupUsersResponse]
     """
 
+    httpx_request_kwargs = httpx_request_kwargs or {}
     kwargs = _get_kwargs(
         group_name=group_name,
         page_size=page_size,
@@ -158,10 +165,12 @@ async def asyncio_from_dict(
     group_name: str,
     *,
     client: httpx.AsyncClient,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListGroupUsersResponse]]:
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListGroupUsersResponse]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         group_name=group_name,
         client=client,

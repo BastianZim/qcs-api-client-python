@@ -1,21 +1,17 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional
+from __future__ import annotations
 
-from typing import List
-
+import datetime
+from collections.abc import Callable, Mapping
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+from dateutil.parser import isoparse
 from rfc3339 import rfc3339
 
+from ..models.account_type import AccountType
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from typing import Union
-import datetime
-from ..models.account_type import AccountType
-from dateutil.parser import isoparse
-
 
 T = TypeVar("T", bound="CreateReservationRequest")
 
@@ -27,39 +23,36 @@ class CreateReservationRequest:
         end_time (datetime.datetime):
         quantum_processor_id (str):
         start_time (datetime.datetime):
-        account_id (Union[Unset, str]): userId for `accountType` "user", group name for `accountType` "group".
-        account_type (Union[Unset, AccountType]): There are two types of accounts within QCS: user (representing a
-            single user in Okta) and group
-            (representing one or more users in Okta).
-        notes (Union[Unset, str]):
+        account_id (str | Unset): userId for `accountType` "user", group name for `accountType` "group".
+        account_type (AccountType | Unset): There are two types of accounts within QCS: user (representing a single user
+            in Okta) and group (representing one or more users in Okta).
+        notes (str | Unset):
     """
 
     end_time: datetime.datetime
     quantum_processor_id: str
     start_time: datetime.datetime
-    account_id: Union[Unset, str] = UNSET
-    account_type: Union[Unset, AccountType] = UNSET
-    notes: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    account_id: str | Unset = UNSET
+    account_type: AccountType | Unset = UNSET
+    notes: str | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
-        assert self.end_time.tzinfo is not None, "Datetime must have timezone information"
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         end_time = rfc3339(self.end_time)
 
         quantum_processor_id = self.quantum_processor_id
 
-        assert self.start_time.tzinfo is not None, "Datetime must have timezone information"
         start_time = rfc3339(self.start_time)
 
         account_id = self.account_id
 
-        account_type: Union[Unset, str] = UNSET
+        account_type: str | Unset = UNSET
         if not isinstance(self.account_type, Unset):
             account_type = self.account_type.value
 
         notes = self.notes
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -75,15 +68,16 @@ class CreateReservationRequest:
         if notes is not UNSET:
             field_dict["notes"] = notes
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         end_time = isoparse(d.pop("endTime"))
 
         quantum_processor_id = d.pop("quantumProcessorId")
@@ -93,7 +87,7 @@ class CreateReservationRequest:
         account_id = d.pop("accountId", UNSET)
 
         _account_type = d.pop("accountType", UNSET)
-        account_type: Union[Unset, AccountType]
+        account_type: AccountType | Unset
         if isinstance(_account_type, Unset):
             account_type = UNSET
         else:
@@ -114,7 +108,7 @@ class CreateReservationRequest:
         return create_reservation_request
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

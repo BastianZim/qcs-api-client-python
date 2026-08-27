@@ -1,16 +1,13 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional, TYPE_CHECKING
+from __future__ import annotations
 
-from typing import List
-
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from typing import Union
 
 if TYPE_CHECKING:
     from ..models.checksum_description import ChecksumDescription
@@ -24,25 +21,25 @@ class ClientApplicationsDownloadLink:
     """
     Attributes:
         url (str):
-        checksum_description (Union[Unset, ChecksumDescription]):
-        platform (Union[Unset, str]):
+        checksum_description (ChecksumDescription | Unset):
+        platform (str | Unset):
     """
 
     url: str
-    checksum_description: Union[Unset, "ChecksumDescription"] = UNSET
-    platform: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    checksum_description: ChecksumDescription | Unset = UNSET
+    platform: str | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         url = self.url
 
-        checksum_description: Union[Unset, Dict[str, Any]] = UNSET
+        checksum_description: dict[str, Any] | Unset = UNSET
         if not isinstance(self.checksum_description, Unset):
             checksum_description = self.checksum_description.to_dict()
 
         platform = self.platform
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -54,21 +51,22 @@ class ClientApplicationsDownloadLink:
         if platform is not UNSET:
             field_dict["platform"] = platform
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.checksum_description import ChecksumDescription
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         url = d.pop("url")
 
         _checksum_description = d.pop("checksumDescription", UNSET)
-        checksum_description: Union[Unset, ChecksumDescription]
+        checksum_description: ChecksumDescription | Unset
         if isinstance(_checksum_description, Unset):
             checksum_description = UNSET
         else:
@@ -86,7 +84,7 @@ class ClientApplicationsDownloadLink:
         return client_applications_download_link
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

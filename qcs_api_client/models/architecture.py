@@ -1,18 +1,18 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional, TYPE_CHECKING
+from __future__ import annotations
 
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
+from ..models.family import Family
 from ..types import UNSET
 from ..util.serialization import is_not_none
 
-
-from ..models.family import Family
-from typing import List
-
 if TYPE_CHECKING:
-    from ..models.node import Node
     from ..models.edge import Edge
+    from ..models.node import Node
 
 
 T = TypeVar("T", bound="Architecture")
@@ -29,9 +29,9 @@ class Architecture:
     information. Architecture layouts are defined by the `family`, as follows.
 
     The "Aspen" family of quantum processor indicates a 2D planar grid layout of octagon unit
-    cells. The `node_id` in this architecture is computed as :math:`100 p_y + 10 p_x + p_u` where
-    :math:`p_y` is the zero-based Y position in the unit cell grid, :math:`p_x` is the zero-based
-    X position in the unit cell grid, and :math:`p_u` is the zero-based position in the octagon
+    cells. The `node_id` in this architecture is computed as `100 p_y + 10 p_x + p_u` where
+    `p_y` is the zero-based Y position in the unit cell grid, `p_x` is the zero-based
+    X position in the unit cell grid, and `p_u` is the zero-based position in the octagon
     unit cell and always ranges from 0 to 7. This scheme has a natural size limit of a 10x10
     unit cell grid, which permits the architecture to scale up to 800 nodes.
 
@@ -40,7 +40,7 @@ class Architecture:
     that any 1Q or 2Q operation will be available to users writing QUIL programs.
 
         Attributes:
-            edges (List['Edge']): A list of all computational edges in the instruction set architecture.
+            edges (list[Edge]): A list of all computational edges in the instruction set architecture.
             family (Family): Family identifier.
 
                 Value 'None' implies the architecture has no specific layout topology.
@@ -48,14 +48,15 @@ class Architecture:
 
                 For other values based on deployed architecture layouts (e.g. `Aspen` and `Ankaa`), refer to
                 the architecture classes themselves for more details.
-            nodes (List['Node']): A list of all computational nodes in the instruction set architecture.
+            nodes (list[Node]): A list of all computational nodes in the instruction set architecture.
     """
 
-    edges: List["Edge"]
+    edges: list[Edge]
     family: Family
-    nodes: List["Node"]
+    nodes: list[Node]
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         edges = []
         for edges_item_data in self.edges:
             edges_item = edges_item_data.to_dict()
@@ -68,7 +69,8 @@ class Architecture:
             nodes_item = nodes_item_data.to_dict()
             nodes.append(nodes_item)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "edges": edges,
@@ -77,18 +79,19 @@ class Architecture:
             }
         )
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        from ..models.node import Node
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.edge import Edge
+        from ..models.node import Node
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         edges = []
         _edges = d.pop("edges")
         for edges_item_data in _edges:
@@ -111,4 +114,21 @@ class Architecture:
             nodes=nodes,
         )
 
+        architecture.additional_properties = d
         return architecture
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

@@ -1,8 +1,9 @@
 from datetime import timedelta
 from http import HTTPStatus
-from .errors import QCSHTTPStatusError
-from tenacity import stop_after_attempt, wait_random_exponential, retry_if_exception
 
+from tenacity import retry_if_exception, stop_after_attempt, wait_random_exponential
+
+from .errors import QCSHTTPStatusError
 
 DEFAULT_RETRY_STATUS_CODES = {
     HTTPStatus.BAD_GATEWAY,

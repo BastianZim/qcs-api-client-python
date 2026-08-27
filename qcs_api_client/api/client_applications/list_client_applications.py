@@ -1,18 +1,17 @@
-from http import HTTPStatus
-from typing import Any, Dict
+from typing import Any
 
 import httpx
 from tenacity import retry
 
+from ...models.list_client_applications_response import ListClientApplicationsResponse
 from ...types import Response
-from ...util.errors import raise_for_status
+from ...util.errors import QCSHTTPStatusError
 from ...util.retry import DEFAULT_RETRY_ARGUMENTS
 
-from ...models.list_client_applications_response import ListClientApplicationsResponse
 
+def _get_kwargs() -> dict[str, Any]:
 
-def _get_kwargs() -> Dict[str, Any]:
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/v1/clientApplications",
     }
@@ -20,13 +19,16 @@ def _get_kwargs() -> Dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(*, response: httpx.Response) -> ListClientApplicationsResponse:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, response: httpx.Response) -> ListClientApplicationsResponse | None:
+    if response.status_code == 200:
         response_200 = ListClientApplicationsResponse.from_dict(response.json())
 
         return response_200
-    else:
-        raise_for_status(response)
+
+    raise QCSHTTPStatusError(
+        message=f"Unexpected response: status code {response.status_code}",
+        response=response,
+    )
 
 
 def _build_response(*, response: httpx.Response) -> Response[ListClientApplicationsResponse]:
@@ -38,7 +40,7 @@ def _build_response(*, response: httpx.Response) -> Response[ListClientApplicati
 def sync(
     *,
     client: httpx.Client,
-    httpx_request_kwargs: Dict[str, Any] = {},
+    httpx_request_kwargs: dict[str, Any] | None = None,
 ) -> Response[ListClientApplicationsResponse]:
     """List Client Applications
 
@@ -52,6 +54,8 @@ def sync(
     Returns:
         Response[ListClientApplicationsResponse]
     """
+
+    httpx_request_kwargs = httpx_request_kwargs or {}
 
     kwargs = _get_kwargs()
     kwargs.update(httpx_request_kwargs)
@@ -66,8 +70,10 @@ def sync(
 def sync_from_dict(
     *,
     client: httpx.Client,
-    httpx_request_kwargs: Dict[str, Any] = {},
+    httpx_request_kwargs: dict[str, Any] | None = None,
 ) -> Response[ListClientApplicationsResponse]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -82,7 +88,7 @@ def sync_from_dict(
 async def asyncio(
     *,
     client: httpx.AsyncClient,
-    httpx_request_kwargs: Dict[str, Any] = {},
+    httpx_request_kwargs: dict[str, Any] | None = None,
 ) -> Response[ListClientApplicationsResponse]:
     """List Client Applications
 
@@ -97,6 +103,7 @@ async def asyncio(
         Response[ListClientApplicationsResponse]
     """
 
+    httpx_request_kwargs = httpx_request_kwargs or {}
     kwargs = _get_kwargs()
     kwargs.update(httpx_request_kwargs)
     response = await client.request(**kwargs)
@@ -107,8 +114,10 @@ async def asyncio(
 async def asyncio_from_dict(
     *,
     client: httpx.AsyncClient,
-    httpx_request_kwargs: Dict[str, Any] = {},
+    httpx_request_kwargs: dict[str, Any] | None = None,
 ) -> Response[ListClientApplicationsResponse]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         client=client,
     )

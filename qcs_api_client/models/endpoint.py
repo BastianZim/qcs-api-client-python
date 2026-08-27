@@ -1,17 +1,13 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional, TYPE_CHECKING
+from __future__ import annotations
 
-from typing import List
-
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from typing import cast
-from typing import Union
 
 if TYPE_CHECKING:
     from ..models.endpoint_addresses import EndpointAddresses
@@ -29,22 +25,21 @@ class Endpoint:
         healthy (bool): Whether the endpoint is operating as intended
         id (str): Unique, opaque identifier for the endpoint
         mock (bool): Whether the endpoint serves simulated or substituted data for testing purposes
-        address (Union[None, Unset, str]): Network address at which the endpoint is locally reachable
-        datacenter (Union[Unset, str]): Datacenter within which the endpoint is deployed
-        quantum_processor_ids (Union[Unset, List[str]]): Public identifiers for quantum processors served by this
-            endpoint.
+        address (None | str | Unset): Network address at which the endpoint is locally reachable
+        datacenter (str | Unset): Datacenter within which the endpoint is deployed
+        quantum_processor_ids (list[str] | Unset): Public identifiers for quantum processors served by this endpoint.
     """
 
-    addresses: "EndpointAddresses"
+    addresses: EndpointAddresses
     healthy: bool
     id: str
     mock: bool
-    address: Union[None, Unset, str] = UNSET
-    datacenter: Union[Unset, str] = UNSET
-    quantum_processor_ids: Union[Unset, List[str]] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    address: None | str | Unset = UNSET
+    datacenter: str | Unset = UNSET
+    quantum_processor_ids: list[str] | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         addresses = self.addresses.to_dict()
 
         healthy = self.healthy
@@ -53,7 +48,7 @@ class Endpoint:
 
         mock = self.mock
 
-        address: Union[None, Unset, str]
+        address: None | str | Unset
         if isinstance(self.address, Unset):
             address = UNSET
         else:
@@ -61,11 +56,11 @@ class Endpoint:
 
         datacenter = self.datacenter
 
-        quantum_processor_ids: Union[Unset, List[str]] = UNSET
+        quantum_processor_ids: list[str] | Unset = UNSET
         if not isinstance(self.quantum_processor_ids, Unset):
             quantum_processor_ids = self.quantum_processor_ids
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -82,17 +77,18 @@ class Endpoint:
         if quantum_processor_ids is not UNSET:
             field_dict["quantumProcessorIds"] = quantum_processor_ids
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.endpoint_addresses import EndpointAddresses
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         addresses = EndpointAddresses.from_dict(d.pop("addresses"))
 
         healthy = d.pop("healthy")
@@ -101,18 +97,18 @@ class Endpoint:
 
         mock = d.pop("mock")
 
-        def _parse_address(data: object) -> Union[None, Unset, str]:
+        def _parse_address(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         address = _parse_address(d.pop("address", UNSET))
 
         datacenter = d.pop("datacenter", UNSET)
 
-        quantum_processor_ids = cast(List[str], d.pop("quantumProcessorIds", UNSET))
+        quantum_processor_ids = cast(list[str], d.pop("quantumProcessorIds", UNSET))
 
         endpoint = cls(
             addresses=addresses,
@@ -128,7 +124,7 @@ class Endpoint:
         return endpoint
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

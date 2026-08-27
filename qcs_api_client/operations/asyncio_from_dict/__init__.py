@@ -66,11 +66,11 @@ from qcs_api_client.api.quantum_processors.get_instruction_set_architecture impo
     asyncio_from_dict as get_instruction_set_architecture,
 )
 from qcs_api_client.api.quantum_processors.get_quantum_processor import asyncio_from_dict as get_quantum_processor
+from qcs_api_client.api.quantum_processors.get_quantum_processor_accessors import (
+    asyncio_from_dict as get_quantum_processor_accessors,
+)
 from qcs_api_client.api.quantum_processors.list_instruction_set_architectures import (
     asyncio_from_dict as list_instruction_set_architectures,
-)
-from qcs_api_client.api.quantum_processors.list_quantum_processor_accessors import (
-    asyncio_from_dict as list_quantum_processor_accessors,
 )
 from qcs_api_client.api.quantum_processors.list_quantum_processors import asyncio_from_dict as list_quantum_processors
 from qcs_api_client.api.reservations.create_reservation import asyncio_from_dict as create_reservation
@@ -79,9 +79,61 @@ from qcs_api_client.api.reservations.find_available_reservations import asyncio_
 from qcs_api_client.api.reservations.get_quantum_processor_calendar import (
     asyncio_from_dict as get_quantum_processor_calendar,
 )
+from qcs_api_client.api.reservations.get_reservation import asyncio_from_dict as get_reservation
 from qcs_api_client.api.reservations.list_group_reservations import asyncio_from_dict as list_group_reservations
 from qcs_api_client.api.reservations.list_reservations import asyncio_from_dict as list_reservations
-from qcs_api_client.api.translation.get_quilt_calibrations import asyncio_from_dict as get_quilt_calibrations
-from qcs_api_client.api.translation.translate_native_quil_to_encrypted_binary import (
-    asyncio_from_dict as translate_native_quil_to_encrypted_binary,
-)
+
+__all__ = [
+    "activate_user",
+    "add_group_user",
+    "auth_email_password_reset_token",
+    "auth_get_user",
+    "auth_reset_password_with_token",
+    "auth_reset_password",
+    "check_client_application",
+    "create_endpoint",
+    "create_engagement",
+    "create_reservation",
+    "delete_endpoint",
+    "delete_reservation",
+    "dismiss_viewer_announcement",
+    "find_available_reservations",
+    "get_client_application",
+    "get_default_endpoint",
+    "get_endpoint",
+    "get_group_balance",
+    "get_group_billing_customer",
+    "get_group_upcoming_billing_invoice",
+    "get_health",
+    "get_instruction_set_architecture",
+    "get_quantum_processor_accessors",
+    "get_quantum_processor_calendar",
+    "get_quantum_processor",
+    "get_reservation",
+    "get_user_balance",
+    "get_user_billing_customer",
+    "get_user_event_billing_price",
+    "get_user_upcoming_billing_invoice",
+    "get_viewer_user_onboarding_completed",
+    "health_check_deprecated",
+    "health_check",
+    "list_client_applications",
+    "list_endpoints",
+    "list_group_billing_invoice_lines",
+    "list_group_billing_invoices",
+    "list_group_reservations",
+    "list_group_upcoming_billing_invoice_lines",
+    "list_group_users",
+    "list_instruction_set_architectures",
+    "list_quantum_processors",
+    "list_reservations",
+    "list_user_billing_invoice_lines",
+    "list_user_billing_invoices",
+    "list_user_groups",
+    "list_user_upcoming_billing_invoice_lines",
+    "list_viewer_announcements",
+    "put_viewer_user_onboarding_completed",
+    "remove_group_user",
+    "restart_endpoint",
+    "update_viewer_user_profile",
+]

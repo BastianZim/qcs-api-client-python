@@ -1,31 +1,28 @@
-from http import HTTPStatus
-from typing import Any, Dict, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 from tenacity import retry
 
-from ...types import Response, UNSET
-from ...util.errors import raise_for_status
-from ...util.retry import DEFAULT_RETRY_ARGUMENTS
-
-from ...models.list_reservations_response import ListReservationsResponse
-from ...models.list_group_reservations_show_deleted import (
-    ListGroupReservationsShowDeleted,
-)
-from ...types import Unset
 from ...models.error import Error
+from ...models.list_group_reservations_show_deleted import ListGroupReservationsShowDeleted
+from ...models.list_reservations_response import ListReservationsResponse
+from ...types import UNSET, Response, Unset
+from ...util.errors import QCSHTTPStatusError
+from ...util.retry import DEFAULT_RETRY_ARGUMENTS
 
 
 def _get_kwargs(
     group_name: str,
     *,
-    filter_: Union[Unset, str] = UNSET,
-    order: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    show_deleted: Union[Unset, ListGroupReservationsShowDeleted] = ListGroupReservationsShowDeleted.FALSE,
-) -> Dict[str, Any]:
-    params: Dict[str, Any] = {}
+    filter_: str | Unset = UNSET,
+    order: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    show_deleted: ListGroupReservationsShowDeleted | Unset = ListGroupReservationsShowDeleted.FALSE,
+) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
 
     params["filter"] = filter_
 
@@ -35,7 +32,7 @@ def _get_kwargs(
 
     params["pageToken"] = page_token
 
-    json_show_deleted: Union[Unset, str] = UNSET
+    json_show_deleted: str | Unset = UNSET
     if not isinstance(show_deleted, Unset):
         json_show_deleted = show_deleted.value
 
@@ -43,10 +40,10 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/v1/groups/{group_name}/reservations".format(
-            group_name=group_name,
+            group_name=quote(str(group_name), safe=""),
         ),
         "params": params,
     }
@@ -54,16 +51,19 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, response: httpx.Response) -> Union[Error, ListReservationsResponse]:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, response: httpx.Response) -> Error | ListReservationsResponse | None:
+    if response.status_code == 200:
         response_200 = ListReservationsResponse.from_dict(response.json())
 
         return response_200
-    else:
-        raise_for_status(response)
+
+    raise QCSHTTPStatusError(
+        message=f"Unexpected response: status code {response.status_code}",
+        response=response,
+    )
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[Error, ListReservationsResponse]]:
+def _build_response(*, response: httpx.Response) -> Response[Error | ListReservationsResponse]:
     """Construct the Response class from the raw ``httpx.Response``."""
     return Response.build_from_httpx_response(response=response, parse_function=_parse_response)
 
@@ -73,13 +73,13 @@ def sync(
     group_name: str,
     *,
     client: httpx.Client,
-    filter_: Union[Unset, str] = UNSET,
-    order: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    show_deleted: Union[Unset, ListGroupReservationsShowDeleted] = ListGroupReservationsShowDeleted.FALSE,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListReservationsResponse]]:
+    filter_: str | Unset = UNSET,
+    order: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    show_deleted: ListGroupReservationsShowDeleted | Unset = ListGroupReservationsShowDeleted.FALSE,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListReservationsResponse]:
     """List Group Reservations
 
      List existing reservations for the requested group.
@@ -101,8 +101,8 @@ def sync(
 
     Args:
         group_name (str):
-        filter_ (Union[Unset, str]): A string conforming to a *limited* set of the filtering
-            operations described in [Google AIP 160](https://google.aip.dev/160).
+        filter_ (str | Unset): A string conforming to a *limited* set of the filtering operations
+            described in [Google AIP 160](https://google.aip.dev/160).
 
             * Expressions are always of the form `{field} {operator} {value}` and may be grouped with
             `()` and joined with `AND` or `OR`.
@@ -120,7 +120,7 @@ def sync(
 
             For example, `startTime >= "2020-06-24T22:00:00.000Z" OR (duration >= "15m" AND endTime <
             "2020-06-24T22:00:00.000Z")`.
-        order (Union[Unset, str]): A string conforming to order specification described in [Google
+        order (str | Unset): A string conforming to order specification described in [Google
             AIP 132](https://google.aip.dev/132#ordering).
 
             * Fields are specific to the route in question, but are typically a subset
@@ -129,9 +129,9 @@ def sync(
             * Fields are sorted in *ascending* order unless the field is followed by `DESC`.
 
             For example, `quantumProcessorId, startTime DESC`.
-        page_size (Union[Unset, int]):
-        page_token (Union[Unset, str]):
-        show_deleted (Union[Unset, ListGroupReservationsShowDeleted]):  Default:
+        page_size (int | Unset):
+        page_token (str | Unset):
+        show_deleted (ListGroupReservationsShowDeleted | Unset):  Default:
             ListGroupReservationsShowDeleted.FALSE.
 
     Raises:
@@ -139,8 +139,10 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, ListReservationsResponse]]
+        Response[Error | ListReservationsResponse]
     """
+
+    httpx_request_kwargs = httpx_request_kwargs or {}
 
     kwargs = _get_kwargs(
         group_name=group_name,
@@ -163,13 +165,15 @@ def sync_from_dict(
     group_name: str,
     *,
     client: httpx.Client,
-    filter_: Union[Unset, str] = UNSET,
-    order: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    show_deleted: Union[Unset, ListGroupReservationsShowDeleted] = ListGroupReservationsShowDeleted.FALSE,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListReservationsResponse]]:
+    filter_: str | Unset = UNSET,
+    order: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    show_deleted: ListGroupReservationsShowDeleted | Unset = ListGroupReservationsShowDeleted.FALSE,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListReservationsResponse]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         group_name=group_name,
         client=client,
@@ -191,13 +195,13 @@ async def asyncio(
     group_name: str,
     *,
     client: httpx.AsyncClient,
-    filter_: Union[Unset, str] = UNSET,
-    order: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    show_deleted: Union[Unset, ListGroupReservationsShowDeleted] = ListGroupReservationsShowDeleted.FALSE,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListReservationsResponse]]:
+    filter_: str | Unset = UNSET,
+    order: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    show_deleted: ListGroupReservationsShowDeleted | Unset = ListGroupReservationsShowDeleted.FALSE,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListReservationsResponse]:
     """List Group Reservations
 
      List existing reservations for the requested group.
@@ -219,8 +223,8 @@ async def asyncio(
 
     Args:
         group_name (str):
-        filter_ (Union[Unset, str]): A string conforming to a *limited* set of the filtering
-            operations described in [Google AIP 160](https://google.aip.dev/160).
+        filter_ (str | Unset): A string conforming to a *limited* set of the filtering operations
+            described in [Google AIP 160](https://google.aip.dev/160).
 
             * Expressions are always of the form `{field} {operator} {value}` and may be grouped with
             `()` and joined with `AND` or `OR`.
@@ -238,7 +242,7 @@ async def asyncio(
 
             For example, `startTime >= "2020-06-24T22:00:00.000Z" OR (duration >= "15m" AND endTime <
             "2020-06-24T22:00:00.000Z")`.
-        order (Union[Unset, str]): A string conforming to order specification described in [Google
+        order (str | Unset): A string conforming to order specification described in [Google
             AIP 132](https://google.aip.dev/132#ordering).
 
             * Fields are specific to the route in question, but are typically a subset
@@ -247,9 +251,9 @@ async def asyncio(
             * Fields are sorted in *ascending* order unless the field is followed by `DESC`.
 
             For example, `quantumProcessorId, startTime DESC`.
-        page_size (Union[Unset, int]):
-        page_token (Union[Unset, str]):
-        show_deleted (Union[Unset, ListGroupReservationsShowDeleted]):  Default:
+        page_size (int | Unset):
+        page_token (str | Unset):
+        show_deleted (ListGroupReservationsShowDeleted | Unset):  Default:
             ListGroupReservationsShowDeleted.FALSE.
 
     Raises:
@@ -257,9 +261,10 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, ListReservationsResponse]]
+        Response[Error | ListReservationsResponse]
     """
 
+    httpx_request_kwargs = httpx_request_kwargs or {}
     kwargs = _get_kwargs(
         group_name=group_name,
         filter_=filter_,
@@ -278,13 +283,15 @@ async def asyncio_from_dict(
     group_name: str,
     *,
     client: httpx.AsyncClient,
-    filter_: Union[Unset, str] = UNSET,
-    order: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    page_token: Union[Unset, str] = UNSET,
-    show_deleted: Union[Unset, ListGroupReservationsShowDeleted] = ListGroupReservationsShowDeleted.FALSE,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListReservationsResponse]]:
+    filter_: str | Unset = UNSET,
+    order: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    page_token: str | Unset = UNSET,
+    show_deleted: ListGroupReservationsShowDeleted | Unset = ListGroupReservationsShowDeleted.FALSE,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListReservationsResponse]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         group_name=group_name,
         client=client,

@@ -1,14 +1,15 @@
-from pathlib import Path
-from shutil import copytree, rmtree
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+from qcs_api_client_common.configuration import SecretAccessToken
 
-FIXTURE_BASE_PATH = Path(__file__).parent / "__fixtures__"
+from qcs_api_client.client import ClientConfiguration
 
 
 @pytest.fixture
-def fixture_directory(tmpdir):
-    temporary_fixture_directory = Path(tmpdir) / "fixtures"
-    copytree(FIXTURE_BASE_PATH, temporary_fixture_directory)
-    yield temporary_fixture_directory
-    rmtree(temporary_fixture_directory)
+def client_configuration() -> ClientConfiguration:
+    config = AsyncMock(spec=ClientConfiguration)
+    config.api_url = "https://example.com/api/v1/"
+    config.get_bearer_access_token = Mock(return_value=SecretAccessToken("mock_client_token"))
+    config.get_bearer_access_token_async = AsyncMock(return_value=SecretAccessToken("mock_client_token"))
+    return config

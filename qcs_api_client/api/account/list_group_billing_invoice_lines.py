@@ -1,28 +1,25 @@
-from http import HTTPStatus
-from typing import Any, Dict, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 from tenacity import retry
 
-from ...types import Response, UNSET
-from ...util.errors import raise_for_status
-from ...util.retry import DEFAULT_RETRY_ARGUMENTS
-
-from ...models.list_account_billing_invoice_lines_response import (
-    ListAccountBillingInvoiceLinesResponse,
-)
-from ...types import Unset
 from ...models.error import Error
+from ...models.list_account_billing_invoice_lines_response import ListAccountBillingInvoiceLinesResponse
+from ...types import UNSET, Response, Unset
+from ...util.errors import QCSHTTPStatusError
+from ...util.retry import DEFAULT_RETRY_ARGUMENTS
 
 
 def _get_kwargs(
     group_name: str,
     billing_invoice_id: str,
     *,
-    page_token: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-) -> Dict[str, Any]:
-    params: Dict[str, Any] = {}
+    page_token: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
 
     params["pageToken"] = page_token
 
@@ -30,11 +27,11 @@ def _get_kwargs(
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/v1/groups/{group_name}/billingInvoices/{billing_invoice_id}/lines".format(
-            group_name=group_name,
-            billing_invoice_id=billing_invoice_id,
+            group_name=quote(str(group_name), safe=""),
+            billing_invoice_id=quote(str(billing_invoice_id), safe=""),
         ),
         "params": params,
     }
@@ -42,16 +39,19 @@ def _get_kwargs(
     return _kwargs
 
 
-def _parse_response(*, response: httpx.Response) -> Union[Error, ListAccountBillingInvoiceLinesResponse]:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, response: httpx.Response) -> Error | ListAccountBillingInvoiceLinesResponse | None:
+    if response.status_code == 200:
         response_200 = ListAccountBillingInvoiceLinesResponse.from_dict(response.json())
 
         return response_200
-    else:
-        raise_for_status(response)
+
+    raise QCSHTTPStatusError(
+        message=f"Unexpected response: status code {response.status_code}",
+        response=response,
+    )
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[Error, ListAccountBillingInvoiceLinesResponse]]:
+def _build_response(*, response: httpx.Response) -> Response[Error | ListAccountBillingInvoiceLinesResponse]:
     """Construct the Response class from the raw ``httpx.Response``."""
     return Response.build_from_httpx_response(response=response, parse_function=_parse_response)
 
@@ -62,25 +62,27 @@ def sync(
     billing_invoice_id: str,
     *,
     client: httpx.Client,
-    page_token: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListAccountBillingInvoiceLinesResponse]]:
+    page_token: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListAccountBillingInvoiceLinesResponse]:
     """Retrieve billing invoice lines for a QCS group account's invoice.
 
     Args:
         group_name (str):
         billing_invoice_id (str):
-        page_token (Union[Unset, str]):
-        page_size (Union[Unset, int]):
+        page_token (str | Unset):
+        page_size (int | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, ListAccountBillingInvoiceLinesResponse]]
+        Response[Error | ListAccountBillingInvoiceLinesResponse]
     """
+
+    httpx_request_kwargs = httpx_request_kwargs or {}
 
     kwargs = _get_kwargs(
         group_name=group_name,
@@ -102,10 +104,12 @@ def sync_from_dict(
     billing_invoice_id: str,
     *,
     client: httpx.Client,
-    page_token: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListAccountBillingInvoiceLinesResponse]]:
+    page_token: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListAccountBillingInvoiceLinesResponse]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         group_name=group_name,
         billing_invoice_id=billing_invoice_id,
@@ -126,26 +130,27 @@ async def asyncio(
     billing_invoice_id: str,
     *,
     client: httpx.AsyncClient,
-    page_token: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListAccountBillingInvoiceLinesResponse]]:
+    page_token: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListAccountBillingInvoiceLinesResponse]:
     """Retrieve billing invoice lines for a QCS group account's invoice.
 
     Args:
         group_name (str):
         billing_invoice_id (str):
-        page_token (Union[Unset, str]):
-        page_size (Union[Unset, int]):
+        page_token (str | Unset):
+        page_size (int | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, ListAccountBillingInvoiceLinesResponse]]
+        Response[Error | ListAccountBillingInvoiceLinesResponse]
     """
 
+    httpx_request_kwargs = httpx_request_kwargs or {}
     kwargs = _get_kwargs(
         group_name=group_name,
         billing_invoice_id=billing_invoice_id,
@@ -163,10 +168,12 @@ async def asyncio_from_dict(
     billing_invoice_id: str,
     *,
     client: httpx.AsyncClient,
-    page_token: Union[Unset, str] = UNSET,
-    page_size: Union[Unset, int] = UNSET,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, ListAccountBillingInvoiceLinesResponse]]:
+    page_token: str | Unset = UNSET,
+    page_size: int | Unset = UNSET,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | ListAccountBillingInvoiceLinesResponse]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         group_name=group_name,
         billing_invoice_id=billing_invoice_id,

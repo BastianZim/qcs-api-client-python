@@ -1,7 +1,7 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional, TYPE_CHECKING
+from __future__ import annotations
 
-from typing import List
-
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -9,13 +9,8 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
 
-
-from typing import Union
-
 if TYPE_CHECKING:
-    from ..models.client_applications_download_link import (
-        ClientApplicationsDownloadLink,
-    )
+    from ..models.client_applications_download_link import ClientApplicationsDownloadLink
 
 
 T = TypeVar("T", bound="ClientApplication")
@@ -28,20 +23,20 @@ class ClientApplication:
         latest_version (str): Semantic version
         name (str):
         supported (bool):
-        details_uri (Union[Unset, str]):
-        links (Union[Unset, List['ClientApplicationsDownloadLink']]):
-        minimum_version (Union[Unset, str]): Semantic version
+        details_uri (str | Unset):
+        links (list[ClientApplicationsDownloadLink] | Unset):
+        minimum_version (str | Unset): Semantic version
     """
 
     latest_version: str
     name: str
     supported: bool
-    details_uri: Union[Unset, str] = UNSET
-    links: Union[Unset, List["ClientApplicationsDownloadLink"]] = UNSET
-    minimum_version: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    details_uri: str | Unset = UNSET
+    links: list[ClientApplicationsDownloadLink] | Unset = UNSET
+    minimum_version: str | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         latest_version = self.latest_version
 
         name = self.name
@@ -50,7 +45,7 @@ class ClientApplication:
 
         details_uri = self.details_uri
 
-        links: Union[Unset, List[Dict[str, Any]]] = UNSET
+        links: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.links, Unset):
             links = []
             for links_item_data in self.links:
@@ -59,7 +54,7 @@ class ClientApplication:
 
         minimum_version = self.minimum_version
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -75,19 +70,18 @@ class ClientApplication:
         if minimum_version is not UNSET:
             field_dict["minimumVersion"] = minimum_version
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        from ..models.client_applications_download_link import (
-            ClientApplicationsDownloadLink,
-        )
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.client_applications_download_link import ClientApplicationsDownloadLink
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         latest_version = d.pop("latestVersion")
 
         name = d.pop("name")
@@ -96,12 +90,14 @@ class ClientApplication:
 
         details_uri = d.pop("detailsUri", UNSET)
 
-        links = []
         _links = d.pop("links", UNSET)
-        for links_item_data in _links or []:
-            links_item = ClientApplicationsDownloadLink.from_dict(links_item_data)
+        links: list[ClientApplicationsDownloadLink] | Unset = UNSET
+        if _links is not UNSET:
+            links = []
+            for links_item_data in _links:
+                links_item = ClientApplicationsDownloadLink.from_dict(links_item_data)
 
-            links.append(links_item)
+                links.append(links_item)
 
         minimum_version = d.pop("minimumVersion", UNSET)
 
@@ -118,7 +114,7 @@ class ClientApplication:
         return client_application
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

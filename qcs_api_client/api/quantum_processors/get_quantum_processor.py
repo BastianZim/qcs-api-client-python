@@ -1,41 +1,42 @@
-from http import HTTPStatus
-from typing import Any, Dict, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 from tenacity import retry
 
-from ...types import Response
-from ...util.errors import raise_for_status
-from ...util.retry import DEFAULT_RETRY_ARGUMENTS
-
+from ...models.error import Error
 from ...models.quantum_processor import QuantumProcessor
 from ...models.validation_error import ValidationError
-from ...models.error import Error
+from ...types import Response
+from ...util.retry import DEFAULT_RETRY_ARGUMENTS
 
 
 def _get_kwargs(
     quantum_processor_id: str,
-) -> Dict[str, Any]:
-    _kwargs: Dict[str, Any] = {
+) -> dict[str, Any]:
+
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/v1/quantumProcessors/{quantum_processor_id}".format(
-            quantum_processor_id=quantum_processor_id,
+            quantum_processor_id=quote(str(quantum_processor_id), safe=""),
         ),
     }
 
     return _kwargs
 
 
-def _parse_response(*, response: httpx.Response) -> Union[Error, QuantumProcessor, ValidationError]:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, response: httpx.Response) -> Error | QuantumProcessor | ValidationError:
+    if response.status_code == 200:
         response_200 = QuantumProcessor.from_dict(response.json())
 
         return response_200
-    else:
-        raise_for_status(response)
+
+    response_default = Error.from_dict(response.json())
+
+    return response_default
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[Error, QuantumProcessor, ValidationError]]:
+def _build_response(*, response: httpx.Response) -> Response[Error | QuantumProcessor | ValidationError]:
     """Construct the Response class from the raw ``httpx.Response``."""
     return Response.build_from_httpx_response(response=response, parse_function=_parse_response)
 
@@ -45,22 +46,24 @@ def sync(
     quantum_processor_id: str,
     *,
     client: httpx.Client,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, QuantumProcessor, ValidationError]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | QuantumProcessor | ValidationError]:
     """Get Quantum Processor
 
-     Retrieve a single QuantumProcessor by ID.
+     Retrieve a single `QuantumProcessor` by ID.
 
     Args:
-        quantum_processor_id (str): Public identifier for a quantum processor [example: Aspen-1]
+        quantum_processor_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, QuantumProcessor, ValidationError]]
+        Response[Error | QuantumProcessor | ValidationError]
     """
+
+    httpx_request_kwargs = httpx_request_kwargs or {}
 
     kwargs = _get_kwargs(
         quantum_processor_id=quantum_processor_id,
@@ -78,8 +81,10 @@ def sync_from_dict(
     quantum_processor_id: str,
     *,
     client: httpx.Client,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, QuantumProcessor, ValidationError]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | QuantumProcessor | ValidationError]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         quantum_processor_id=quantum_processor_id,
         client=client,
@@ -96,23 +101,24 @@ async def asyncio(
     quantum_processor_id: str,
     *,
     client: httpx.AsyncClient,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, QuantumProcessor, ValidationError]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | QuantumProcessor | ValidationError]:
     """Get Quantum Processor
 
-     Retrieve a single QuantumProcessor by ID.
+     Retrieve a single `QuantumProcessor` by ID.
 
     Args:
-        quantum_processor_id (str): Public identifier for a quantum processor [example: Aspen-1]
+        quantum_processor_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, QuantumProcessor, ValidationError]]
+        Response[Error | QuantumProcessor | ValidationError]
     """
 
+    httpx_request_kwargs = httpx_request_kwargs or {}
     kwargs = _get_kwargs(
         quantum_processor_id=quantum_processor_id,
     )
@@ -126,8 +132,10 @@ async def asyncio_from_dict(
     quantum_processor_id: str,
     *,
     client: httpx.AsyncClient,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, QuantumProcessor, ValidationError]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | QuantumProcessor | ValidationError]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         quantum_processor_id=quantum_processor_id,
         client=client,

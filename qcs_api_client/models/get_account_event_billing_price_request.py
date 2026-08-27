@@ -1,18 +1,14 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional
+from __future__ import annotations
 
-from typing import List
-
+from collections.abc import Callable, Mapping
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.product import Product
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from typing import Union
-from ..models.product import Product
-
 
 T = TypeVar("T", bound="GetAccountEventBillingPriceRequest")
 
@@ -24,19 +20,19 @@ class GetAccountEventBillingPriceRequest:
 
         Attributes:
             product (Product): The set of known QCS service products.
-            quantum_processor_id (Union[Unset, str]):
+            quantum_processor_id (str | Unset):
     """
 
     product: Product
-    quantum_processor_id: Union[Unset, str] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    quantum_processor_id: str | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         product = self.product.value
 
         quantum_processor_id = self.quantum_processor_id
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -46,15 +42,16 @@ class GetAccountEventBillingPriceRequest:
         if quantum_processor_id is not UNSET:
             field_dict["quantumProcessorId"] = quantum_processor_id
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         product = Product(d.pop("product"))
 
         quantum_processor_id = d.pop("quantumProcessorId", UNSET)
@@ -68,7 +65,7 @@ class GetAccountEventBillingPriceRequest:
         return get_account_event_billing_price_request
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

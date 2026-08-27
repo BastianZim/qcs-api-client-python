@@ -1,18 +1,17 @@
-from http import HTTPStatus
-from typing import Any, Dict
+from typing import Any
 
 import httpx
 from tenacity import retry
 
+from ...models.health import Health
 from ...types import Response
-from ...util.errors import raise_for_status
+from ...util.errors import QCSHTTPStatusError
 from ...util.retry import DEFAULT_RETRY_ARGUMENTS
 
-from ...models.health import Health
 
+def _get_kwargs() -> dict[str, Any]:
 
-def _get_kwargs() -> Dict[str, Any]:
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/",
     }
@@ -20,13 +19,16 @@ def _get_kwargs() -> Dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(*, response: httpx.Response) -> Health:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, response: httpx.Response) -> Health | None:
+    if response.status_code == 200:
         response_200 = Health.from_dict(response.json())
 
         return response_200
-    else:
-        raise_for_status(response)
+
+    raise QCSHTTPStatusError(
+        message=f"Unexpected response: status code {response.status_code}",
+        response=response,
+    )
 
 
 def _build_response(*, response: httpx.Response) -> Response[Health]:
@@ -38,7 +40,7 @@ def _build_response(*, response: httpx.Response) -> Response[Health]:
 def sync(
     *,
     client: httpx.Client,
-    httpx_request_kwargs: Dict[str, Any] = {},
+    httpx_request_kwargs: dict[str, Any] | None = None,
 ) -> Response[Health]:
     """Retrieve the health status of the API
 
@@ -49,6 +51,8 @@ def sync(
     Returns:
         Response[Health]
     """
+
+    httpx_request_kwargs = httpx_request_kwargs or {}
 
     kwargs = _get_kwargs()
     kwargs.update(httpx_request_kwargs)
@@ -63,8 +67,10 @@ def sync(
 def sync_from_dict(
     *,
     client: httpx.Client,
-    httpx_request_kwargs: Dict[str, Any] = {},
+    httpx_request_kwargs: dict[str, Any] | None = None,
 ) -> Response[Health]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         client=client,
     )
@@ -79,7 +85,7 @@ def sync_from_dict(
 async def asyncio(
     *,
     client: httpx.AsyncClient,
-    httpx_request_kwargs: Dict[str, Any] = {},
+    httpx_request_kwargs: dict[str, Any] | None = None,
 ) -> Response[Health]:
     """Retrieve the health status of the API
 
@@ -91,6 +97,7 @@ async def asyncio(
         Response[Health]
     """
 
+    httpx_request_kwargs = httpx_request_kwargs or {}
     kwargs = _get_kwargs()
     kwargs.update(httpx_request_kwargs)
     response = await client.request(**kwargs)
@@ -101,8 +108,10 @@ async def asyncio(
 async def asyncio_from_dict(
     *,
     client: httpx.AsyncClient,
-    httpx_request_kwargs: Dict[str, Any] = {},
+    httpx_request_kwargs: dict[str, Any] | None = None,
 ) -> Response[Health]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         client=client,
     )

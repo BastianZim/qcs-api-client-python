@@ -1,40 +1,43 @@
-from http import HTTPStatus
-from typing import Any, Dict, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 from tenacity import retry
 
-from ...types import Response
-from ...util.errors import raise_for_status
-from ...util.retry import DEFAULT_RETRY_ARGUMENTS
-
-from ...models.quantum_processor_calendar import QuantumProcessorCalendar
 from ...models.error import Error
+from ...models.quantum_processor_calendar import QuantumProcessorCalendar
+from ...types import Response
+from ...util.errors import QCSHTTPStatusError
+from ...util.retry import DEFAULT_RETRY_ARGUMENTS
 
 
 def _get_kwargs(
     quantum_processor_id: str,
-) -> Dict[str, Any]:
-    _kwargs: Dict[str, Any] = {
+) -> dict[str, Any]:
+
+    _kwargs: dict[str, Any] = {
         "method": "get",
         "url": "/v1/calendars/{quantum_processor_id}".format(
-            quantum_processor_id=quantum_processor_id,
+            quantum_processor_id=quote(str(quantum_processor_id), safe=""),
         ),
     }
 
     return _kwargs
 
 
-def _parse_response(*, response: httpx.Response) -> Union[Error, QuantumProcessorCalendar]:
-    if response.status_code == HTTPStatus.OK:
+def _parse_response(*, response: httpx.Response) -> Error | QuantumProcessorCalendar | None:
+    if response.status_code == 200:
         response_200 = QuantumProcessorCalendar.from_dict(response.json())
 
         return response_200
-    else:
-        raise_for_status(response)
+
+    raise QCSHTTPStatusError(
+        message=f"Unexpected response: status code {response.status_code}",
+        response=response,
+    )
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[Error, QuantumProcessorCalendar]]:
+def _build_response(*, response: httpx.Response) -> Response[Error | QuantumProcessorCalendar]:
     """Construct the Response class from the raw ``httpx.Response``."""
     return Response.build_from_httpx_response(response=response, parse_function=_parse_response)
 
@@ -44,8 +47,8 @@ def sync(
     quantum_processor_id: str,
     *,
     client: httpx.Client,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, QuantumProcessorCalendar]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | QuantumProcessorCalendar]:
     """Get Quantum Processor Calendar
 
      Get calendar details for the requested quantum processor.
@@ -58,8 +61,10 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, QuantumProcessorCalendar]]
+        Response[Error | QuantumProcessorCalendar]
     """
+
+    httpx_request_kwargs = httpx_request_kwargs or {}
 
     kwargs = _get_kwargs(
         quantum_processor_id=quantum_processor_id,
@@ -77,8 +82,10 @@ def sync_from_dict(
     quantum_processor_id: str,
     *,
     client: httpx.Client,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, QuantumProcessorCalendar]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | QuantumProcessorCalendar]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         quantum_processor_id=quantum_processor_id,
         client=client,
@@ -95,8 +102,8 @@ async def asyncio(
     quantum_processor_id: str,
     *,
     client: httpx.AsyncClient,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, QuantumProcessorCalendar]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | QuantumProcessorCalendar]:
     """Get Quantum Processor Calendar
 
      Get calendar details for the requested quantum processor.
@@ -109,9 +116,10 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Error, QuantumProcessorCalendar]]
+        Response[Error | QuantumProcessorCalendar]
     """
 
+    httpx_request_kwargs = httpx_request_kwargs or {}
     kwargs = _get_kwargs(
         quantum_processor_id=quantum_processor_id,
     )
@@ -125,8 +133,10 @@ async def asyncio_from_dict(
     quantum_processor_id: str,
     *,
     client: httpx.AsyncClient,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Error, QuantumProcessorCalendar]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Error | QuantumProcessorCalendar]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         quantum_processor_id=quantum_processor_id,
         client=client,

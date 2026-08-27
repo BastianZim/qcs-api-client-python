@@ -21,7 +21,3 @@ dmypy.json
 
 /coverage.xml
 /.coverage
-
-# Sphinx
-docs/_build/
-docs/autoapi/

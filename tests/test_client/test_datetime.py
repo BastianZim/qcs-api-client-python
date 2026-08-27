@@ -1,9 +1,11 @@
-from qcs_api_client.models import Characteristic
 from datetime import datetime
+
 from dateutil.tz import tzutc
 
+from qcs_api_client.models import Characteristic
 
-def test_sync_client_api_call():
+
+def test_datetime_conversion():
     """"""
     data = {
         "name": "MEASURE",

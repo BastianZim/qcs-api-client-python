@@ -1,18 +1,14 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional, TYPE_CHECKING
+from __future__ import annotations
 
-from typing import List
-
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.account_type import AccountType
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from typing import cast
-from typing import Union
-from ..models.account_type import AccountType
 
 if TYPE_CHECKING:
     from ..models.engagement_credentials import EngagementCredentials
@@ -33,29 +29,28 @@ class EngagementWithCredentials:
         endpoint_id (str): The ID of the endpoint to which this engagement grants access
         expires_at (str): Time after which the engagement is no longer valid. Given in RFC3339 format.
         user_id (str):
-        account_id (Union[Unset, str]): User ID or group name on behalf of which the engagement is made.
-        account_type (Union[Unset, AccountType]): There are two types of accounts within QCS: user (representing a
-            single user in Okta) and group
-            (representing one or more users in Okta).
-        minimum_priority (Union[Unset, int]): The minimum priority value allowed for execution
-        quantum_processor_ids (Union[Unset, List[str]]): The quantum processors for which this engagement enables access
-            and execution
-        tags (Union[Unset, List[str]]): Tags recorded on QPU requests and recorded on usage records.
+        account_id (str | Unset): User ID or group name on behalf of which the engagement is made.
+        account_type (AccountType | Unset): There are two types of accounts within QCS: user (representing a single user
+            in Okta) and group (representing one or more users in Okta).
+        minimum_priority (int | Unset): The minimum priority value allowed for execution
+        quantum_processor_ids (list[str] | Unset): The quantum processors for which this engagement enables access and
+            execution
+        tags (list[str] | Unset): Tags recorded on QPU requests and recorded on usage records.
     """
 
     address: str
-    credentials: "EngagementCredentials"
+    credentials: EngagementCredentials
     endpoint_id: str
     expires_at: str
     user_id: str
-    account_id: Union[Unset, str] = UNSET
-    account_type: Union[Unset, AccountType] = UNSET
-    minimum_priority: Union[Unset, int] = UNSET
-    quantum_processor_ids: Union[Unset, List[str]] = UNSET
-    tags: Union[Unset, List[str]] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    account_id: str | Unset = UNSET
+    account_type: AccountType | Unset = UNSET
+    minimum_priority: int | Unset = UNSET
+    quantum_processor_ids: list[str] | Unset = UNSET
+    tags: list[str] | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         address = self.address
 
         credentials = self.credentials.to_dict()
@@ -68,21 +63,21 @@ class EngagementWithCredentials:
 
         account_id = self.account_id
 
-        account_type: Union[Unset, str] = UNSET
+        account_type: str | Unset = UNSET
         if not isinstance(self.account_type, Unset):
             account_type = self.account_type.value
 
         minimum_priority = self.minimum_priority
 
-        quantum_processor_ids: Union[Unset, List[str]] = UNSET
+        quantum_processor_ids: list[str] | Unset = UNSET
         if not isinstance(self.quantum_processor_ids, Unset):
             quantum_processor_ids = self.quantum_processor_ids
 
-        tags: Union[Unset, List[str]] = UNSET
+        tags: list[str] | Unset = UNSET
         if not isinstance(self.tags, Unset):
             tags = self.tags
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -104,17 +99,18 @@ class EngagementWithCredentials:
         if tags is not UNSET:
             field_dict["tags"] = tags
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.engagement_credentials import EngagementCredentials
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         address = d.pop("address")
 
         credentials = EngagementCredentials.from_dict(d.pop("credentials"))
@@ -128,7 +124,7 @@ class EngagementWithCredentials:
         account_id = d.pop("accountId", UNSET)
 
         _account_type = d.pop("accountType", UNSET)
-        account_type: Union[Unset, AccountType]
+        account_type: AccountType | Unset
         if isinstance(_account_type, Unset):
             account_type = UNSET
         else:
@@ -136,9 +132,9 @@ class EngagementWithCredentials:
 
         minimum_priority = d.pop("minimumPriority", UNSET)
 
-        quantum_processor_ids = cast(List[str], d.pop("quantumProcessorIds", UNSET))
+        quantum_processor_ids = cast(list[str], d.pop("quantumProcessorIds", UNSET))
 
-        tags = cast(List[str], d.pop("tags", UNSET))
+        tags = cast(list[str], d.pop("tags", UNSET))
 
         engagement_with_credentials = cls(
             address=address,
@@ -157,7 +153,7 @@ class EngagementWithCredentials:
         return engagement_with_credentials
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

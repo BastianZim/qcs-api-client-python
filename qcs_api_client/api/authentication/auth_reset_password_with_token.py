@@ -1,48 +1,46 @@
-from http import HTTPStatus
-from typing import Any, Dict, Union, cast
+from typing import Any, cast
 
 import httpx
 from tenacity import retry
 
-from ...types import Response
-from ...util.errors import raise_for_status
-from ...util.retry import DEFAULT_RETRY_ARGUMENTS
-
+from ...models.auth_reset_password_with_token_request import AuthResetPasswordWithTokenRequest
 from ...models.error import Error
-from ...models.auth_reset_password_with_token_request import (
-    AuthResetPasswordWithTokenRequest,
-)
+from ...types import Response
+from ...util.errors import QCSHTTPStatusError
+from ...util.retry import DEFAULT_RETRY_ARGUMENTS
 
 
 def _get_kwargs(
     *,
     body: AuthResetPasswordWithTokenRequest,
-) -> Dict[str, Any]:
-    headers: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
-    _kwargs: Dict[str, Any] = {
+    _kwargs: dict[str, Any] = {
         "method": "post",
         "url": "/v1/auth:resetPasswordWithToken",
     }
 
-    _body = body.to_dict()
+    _kwargs["json"] = body.to_dict()
 
-    _kwargs["json"] = _body
     headers["Content-Type"] = "application/json"
 
     _kwargs["headers"] = headers
     return _kwargs
 
 
-def _parse_response(*, response: httpx.Response) -> Union[Any, Error]:
-    if response.status_code == HTTPStatus.NO_CONTENT:
+def _parse_response(*, response: httpx.Response) -> Any | Error | None:
+    if response.status_code == 204:
         response_204 = cast(Any, None)
         return response_204
-    else:
-        raise_for_status(response)
+
+    raise QCSHTTPStatusError(
+        message=f"Unexpected response: status code {response.status_code}",
+        response=response,
+    )
 
 
-def _build_response(*, response: httpx.Response) -> Response[Union[Any, Error]]:
+def _build_response(*, response: httpx.Response) -> Response[Any | Error]:
     """Construct the Response class from the raw ``httpx.Response``."""
     return Response.build_from_httpx_response(response=response, parse_function=_parse_response)
 
@@ -52,8 +50,8 @@ def sync(
     *,
     client: httpx.Client,
     body: AuthResetPasswordWithTokenRequest,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Any, Error]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Any | Error]:
     """Reset Password With Token
 
      Complete the forgot password flow, resetting the new password in exchange for an emailed token.
@@ -67,8 +65,10 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, Error]]
+        Response[Any | Error]
     """
+
+    httpx_request_kwargs = httpx_request_kwargs or {}
 
     kwargs = _get_kwargs(
         body=body,
@@ -85,9 +85,11 @@ def sync(
 def sync_from_dict(
     *,
     client: httpx.Client,
-    body: Dict,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Any, Error]]:
+    body: dict,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Any | Error]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         client=client,
         body=body,
@@ -104,8 +106,8 @@ async def asyncio(
     *,
     client: httpx.AsyncClient,
     body: AuthResetPasswordWithTokenRequest,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Any, Error]]:
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Any | Error]:
     """Reset Password With Token
 
      Complete the forgot password flow, resetting the new password in exchange for an emailed token.
@@ -119,9 +121,10 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, Error]]
+        Response[Any | Error]
     """
 
+    httpx_request_kwargs = httpx_request_kwargs or {}
     kwargs = _get_kwargs(
         body=body,
     )
@@ -134,9 +137,11 @@ async def asyncio(
 async def asyncio_from_dict(
     *,
     client: httpx.AsyncClient,
-    body: Dict,
-    httpx_request_kwargs: Dict[str, Any] = {},
-) -> Response[Union[Any, Error]]:
+    body: dict,
+    httpx_request_kwargs: dict[str, Any] | None = None,
+) -> Response[Any | Error]:
+    httpx_request_kwargs = httpx_request_kwargs or {}
+
     kwargs = _get_kwargs(
         client=client,
         body=body,

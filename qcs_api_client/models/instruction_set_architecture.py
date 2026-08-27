@@ -1,17 +1,17 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional, TYPE_CHECKING
+from __future__ import annotations
 
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 from ..types import UNSET
 from ..util.serialization import is_not_none
 
-
-from typing import List
-
 if TYPE_CHECKING:
-    from ..models.operation import Operation
     from ..models.architecture import Architecture
+    from ..models.operation import Operation
 
 
 T = TypeVar("T", bound="InstructionSetArchitecture")
@@ -38,26 +38,27 @@ class InstructionSetArchitecture:
                 information. Architecture layouts are defined by the `family`, as follows.
 
                 The "Aspen" family of quantum processor indicates a 2D planar grid layout of octagon unit
-                cells. The `node_id` in this architecture is computed as :math:`100 p_y + 10 p_x + p_u` where
-                :math:`p_y` is the zero-based Y position in the unit cell grid, :math:`p_x` is the zero-based
-                X position in the unit cell grid, and :math:`p_u` is the zero-based position in the octagon
+                cells. The `node_id` in this architecture is computed as `100 p_y + 10 p_x + p_u` where
+                `p_y` is the zero-based Y position in the unit cell grid, `p_x` is the zero-based
+                X position in the unit cell grid, and `p_u` is the zero-based position in the octagon
                 unit cell and always ranges from 0 to 7. This scheme has a natural size limit of a 10x10
                 unit cell grid, which permits the architecture to scale up to 800 nodes.
 
                 Note that the operations that are actually available are defined entirely by `Operation`
                 instances. The presence of a node or edge in the `Architecture` model provides no guarantee
                 that any 1Q or 2Q operation will be available to users writing QUIL programs.
-            benchmarks (List['Operation']): The list of benchmarks that have characterized the quantum processor.
-            instructions (List['Operation']): The list of native QUIL instructions supported by the quantum processor.
+            benchmarks (list[Operation]): The list of benchmarks that have characterized the quantum processor.
+            instructions (list[Operation]): The list of native QUIL instructions supported by the quantum processor.
             name (str): The name of the quantum processor.
     """
 
-    architecture: "Architecture"
-    benchmarks: List["Operation"]
-    instructions: List["Operation"]
+    architecture: Architecture
+    benchmarks: list[Operation]
+    instructions: list[Operation]
     name: str
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         architecture = self.architecture.to_dict()
 
         benchmarks = []
@@ -72,7 +73,8 @@ class InstructionSetArchitecture:
 
         name = self.name
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "architecture": architecture,
@@ -82,18 +84,19 @@ class InstructionSetArchitecture:
             }
         )
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        from ..models.operation import Operation
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.architecture import Architecture
+        from ..models.operation import Operation
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         architecture = Architecture.from_dict(d.pop("architecture"))
 
         benchmarks = []
@@ -119,4 +122,21 @@ class InstructionSetArchitecture:
             name=name,
         )
 
+        instruction_set_architecture.additional_properties = d
         return instruction_set_architecture
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

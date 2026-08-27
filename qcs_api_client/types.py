@@ -1,6 +1,7 @@
-""" Contains some shared types for properties """
+"""Contains some shared types for properties"""
 
-from typing import BinaryIO, Callable, Generic, Optional, TextIO, Tuple, TypeVar, Union
+from collections.abc import Callable
+from typing import BinaryIO, Generic, TextIO, TypeVar
 
 import attr
 import httpx
@@ -18,11 +19,11 @@ UNSET: Unset = Unset()
 class File:
     """Contains information for file uploads"""
 
-    payload: Union[BinaryIO, TextIO]
-    file_name: Optional[str] = None
-    mime_type: Optional[str] = None
+    payload: BinaryIO | TextIO
+    file_name: str | None = None
+    mime_type: str | None = None
 
-    def to_tuple(self) -> Tuple[Optional[str], Union[BinaryIO, TextIO], Optional[str]]:
+    def to_tuple(self) -> tuple[str | None, BinaryIO | TextIO, str | None]:
         """Return a tuple representation that httpx will accept for multipart/form-data"""
         return self.file_name, self.payload, self.mime_type
 
@@ -38,7 +39,7 @@ class Response(httpx.Response, Generic[T]):
     known API response type.
     """
 
-    _parsed: Optional[T]
+    _parsed: T | None
     """The response body parsed into an API model instance."""
 
     _parse_function: Callable[[httpx.Response], T]

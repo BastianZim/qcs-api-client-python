@@ -1,19 +1,14 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional
+from __future__ import annotations
 
-from typing import List
-
+from collections.abc import Callable, Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.nomad_job_datacenters import NomadJobDatacenters
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from typing import Union
-from ..models.nomad_job_datacenters import NomadJobDatacenters
-from typing import cast
-
 
 T = TypeVar("T", bound="CreateEndpointParameters")
 
@@ -23,29 +18,28 @@ class CreateEndpointParameters:
     """A publicly available set of parameters for defining an endpoint.
 
     Attributes:
-        datacenters (Union[Unset, List[NomadJobDatacenters]]): Which datacenters are available for endpoint placement.
+        datacenters (list[NomadJobDatacenters] | Unset): Which datacenters are available for endpoint placement.
             Defaults to berkeley-775
-        quantum_processor_ids (Union[Unset, List[str]]): Public identifiers for quantum processors served by this
-            endpoint.
+        quantum_processor_ids (list[str] | Unset): Public identifiers for quantum processors served by this endpoint.
     """
 
-    datacenters: Union[Unset, List[NomadJobDatacenters]] = UNSET
-    quantum_processor_ids: Union[Unset, List[str]] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    datacenters: list[NomadJobDatacenters] | Unset = UNSET
+    quantum_processor_ids: list[str] | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
-        datacenters: Union[Unset, List[str]] = UNSET
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
+        datacenters: list[str] | Unset = UNSET
         if not isinstance(self.datacenters, Unset):
             datacenters = []
             for datacenters_item_data in self.datacenters:
                 datacenters_item = datacenters_item_data.value
                 datacenters.append(datacenters_item)
 
-        quantum_processor_ids: Union[Unset, List[str]] = UNSET
+        quantum_processor_ids: list[str] | Unset = UNSET
         if not isinstance(self.quantum_processor_ids, Unset):
             quantum_processor_ids = self.quantum_processor_ids
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if datacenters is not UNSET:
@@ -53,23 +47,26 @@ class CreateEndpointParameters:
         if quantum_processor_ids is not UNSET:
             field_dict["quantumProcessorIds"] = quantum_processor_ids
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
-        datacenters = []
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         _datacenters = d.pop("datacenters", UNSET)
-        for datacenters_item_data in _datacenters or []:
-            datacenters_item = NomadJobDatacenters(datacenters_item_data)
+        datacenters: list[NomadJobDatacenters] | Unset = UNSET
+        if _datacenters is not UNSET:
+            datacenters = []
+            for datacenters_item_data in _datacenters:
+                datacenters_item = NomadJobDatacenters(datacenters_item_data)
 
-            datacenters.append(datacenters_item)
+                datacenters.append(datacenters_item)
 
-        quantum_processor_ids = cast(List[str], d.pop("quantumProcessorIds", UNSET))
+        quantum_processor_ids = cast(list[str], d.pop("quantumProcessorIds", UNSET))
 
         create_endpoint_parameters = cls(
             datacenters=datacenters,
@@ -80,7 +77,7 @@ class CreateEndpointParameters:
         return create_endpoint_parameters
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

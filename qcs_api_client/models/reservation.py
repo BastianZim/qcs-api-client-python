@@ -1,21 +1,17 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional
+from __future__ import annotations
 
-from typing import List
-
+import datetime
+from collections.abc import Callable, Mapping
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+from dateutil.parser import isoparse
 from rfc3339 import rfc3339
 
+from ..models.account_type import AccountType
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from typing import Union
-import datetime
-from ..models.account_type import AccountType
-from dateutil.parser import isoparse
-
 
 T = TypeVar("T", bound="Reservation")
 
@@ -26,8 +22,7 @@ class Reservation:
     Attributes:
         account_id (str): userId for `accountType` "user", group name for `accountType` "group".
         account_type (AccountType): There are two types of accounts within QCS: user (representing a single user in
-            Okta) and group
-            (representing one or more users in Okta).
+            Okta) and group (representing one or more users in Okta).
         created_time (datetime.datetime):
         end_time (datetime.datetime):
         id (int):
@@ -35,16 +30,14 @@ class Reservation:
         quantum_processor_id (str):
         start_time (datetime.datetime):
         user_id (str): Deprecated in favor of `accountId`.
-        cancellation_billing_invoice_item_id (Union[Unset, str]):
-        cancelled (Union[Unset, bool]):
-        created_by_account_id (Union[Unset, str]): userId for `accountType` "user", group name for `accountType`
-            "group".
-        created_by_account_type (Union[Unset, AccountType]): There are two types of accounts within QCS: user
-            (representing a single user in Okta) and group
-            (representing one or more users in Okta).
-        creation_billing_invoice_item_id (Union[Unset, str]):
-        notes (Union[Unset, str]):
-        updated_time (Union[Unset, datetime.datetime]):
+        cancellation_billing_invoice_item_id (str | Unset):
+        cancelled (bool | Unset):
+        created_by_account_id (str | Unset): userId for `accountType` "user", group name for `accountType` "group".
+        created_by_account_type (AccountType | Unset): There are two types of accounts within QCS: user (representing a
+            single user in Okta) and group (representing one or more users in Okta).
+        creation_billing_invoice_item_id (str | Unset):
+        notes (str | Unset):
+        updated_time (datetime.datetime | Unset):
     """
 
     account_id: str
@@ -56,24 +49,22 @@ class Reservation:
     quantum_processor_id: str
     start_time: datetime.datetime
     user_id: str
-    cancellation_billing_invoice_item_id: Union[Unset, str] = UNSET
-    cancelled: Union[Unset, bool] = UNSET
-    created_by_account_id: Union[Unset, str] = UNSET
-    created_by_account_type: Union[Unset, AccountType] = UNSET
-    creation_billing_invoice_item_id: Union[Unset, str] = UNSET
-    notes: Union[Unset, str] = UNSET
-    updated_time: Union[Unset, datetime.datetime] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    cancellation_billing_invoice_item_id: str | Unset = UNSET
+    cancelled: bool | Unset = UNSET
+    created_by_account_id: str | Unset = UNSET
+    created_by_account_type: AccountType | Unset = UNSET
+    creation_billing_invoice_item_id: str | Unset = UNSET
+    notes: str | Unset = UNSET
+    updated_time: datetime.datetime | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         account_id = self.account_id
 
         account_type = self.account_type.value
 
-        assert self.created_time.tzinfo is not None, "Datetime must have timezone information"
         created_time = rfc3339(self.created_time)
 
-        assert self.end_time.tzinfo is not None, "Datetime must have timezone information"
         end_time = rfc3339(self.end_time)
 
         id = self.id
@@ -82,7 +73,6 @@ class Reservation:
 
         quantum_processor_id = self.quantum_processor_id
 
-        assert self.start_time.tzinfo is not None, "Datetime must have timezone information"
         start_time = rfc3339(self.start_time)
 
         user_id = self.user_id
@@ -93,7 +83,7 @@ class Reservation:
 
         created_by_account_id = self.created_by_account_id
 
-        created_by_account_type: Union[Unset, str] = UNSET
+        created_by_account_type: str | Unset = UNSET
         if not isinstance(self.created_by_account_type, Unset):
             created_by_account_type = self.created_by_account_type.value
 
@@ -101,12 +91,13 @@ class Reservation:
 
         notes = self.notes
 
-        updated_time: Union[Unset, str] = UNSET
+        updated_time: str | Unset = UNSET
         if not isinstance(self.updated_time, Unset):
-            assert self.updated_time.tzinfo is not None, "Datetime must have timezone information"
+            if self.updated_time.tzinfo is None:
+                raise ValueError("Datetime must have timezone information")
             updated_time = rfc3339(self.updated_time)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -136,15 +127,16 @@ class Reservation:
         if updated_time is not UNSET:
             field_dict["updatedTime"] = updated_time
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         account_id = d.pop("accountId")
 
         account_type = AccountType(d.pop("accountType"))
@@ -170,7 +162,7 @@ class Reservation:
         created_by_account_id = d.pop("createdByAccountId", UNSET)
 
         _created_by_account_type = d.pop("createdByAccountType", UNSET)
-        created_by_account_type: Union[Unset, AccountType]
+        created_by_account_type: AccountType | Unset
         if isinstance(_created_by_account_type, Unset):
             created_by_account_type = UNSET
         else:
@@ -181,7 +173,7 @@ class Reservation:
         notes = d.pop("notes", UNSET)
 
         _updated_time = d.pop("updatedTime", UNSET)
-        updated_time: Union[Unset, datetime.datetime]
+        updated_time: datetime.datetime | Unset
         if isinstance(_updated_time, Unset):
             updated_time = UNSET
         else:
@@ -210,7 +202,7 @@ class Reservation:
         return reservation
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

@@ -1,19 +1,16 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional, TYPE_CHECKING
+from __future__ import annotations
 
-from typing import List
-
+import datetime
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+from dateutil.parser import isoparse
 from rfc3339 import rfc3339
 
 from ..types import UNSET, Unset
 from ..util.serialization import is_not_none
-
-
-from typing import Union
-import datetime
-from dateutil.parser import isoparse
 
 if TYPE_CHECKING:
     from ..models.user_profile import UserProfile
@@ -29,28 +26,27 @@ class User:
         created_time (datetime.datetime):
         id (int):
         idp_id (str):
-        profile (Union[Unset, UserProfile]):
+        profile (UserProfile | Unset):
     """
 
     created_time: datetime.datetime
     id: int
     idp_id: str
-    profile: Union[Unset, "UserProfile"] = UNSET
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    profile: UserProfile | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
-        assert self.created_time.tzinfo is not None, "Datetime must have timezone information"
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         created_time = rfc3339(self.created_time)
 
         id = self.id
 
         idp_id = self.idp_id
 
-        profile: Union[Unset, Dict[str, Any]] = UNSET
+        profile: dict[str, Any] | Unset = UNSET
         if not isinstance(self.profile, Unset):
             profile = self.profile.to_dict()
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -62,17 +58,18 @@ class User:
         if profile is not UNSET:
             field_dict["profile"] = profile
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.user_profile import UserProfile
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         created_time = isoparse(d.pop("createdTime"))
 
         id = d.pop("id")
@@ -80,7 +77,7 @@ class User:
         idp_id = d.pop("idpId")
 
         _profile = d.pop("profile", UNSET)
-        profile: Union[Unset, UserProfile]
+        profile: UserProfile | Unset
         if isinstance(_profile, Unset):
             profile = UNSET
         else:
@@ -97,7 +94,7 @@ class User:
         return user
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

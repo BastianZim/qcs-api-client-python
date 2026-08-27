@@ -1,14 +1,13 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional, TYPE_CHECKING
+from __future__ import annotations
 
-from typing import List
-
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET
 from ..util.serialization import is_not_none
-
 
 if TYPE_CHECKING:
     from ..models.client_application import ClientApplication
@@ -21,19 +20,19 @@ T = TypeVar("T", bound="ListClientApplicationsResponse")
 class ListClientApplicationsResponse:
     """
     Attributes:
-        client_applications (List['ClientApplication']):
+        client_applications (list[ClientApplication]):
     """
 
-    client_applications: List["ClientApplication"]
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    client_applications: list[ClientApplication]
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         client_applications = []
         for client_applications_item_data in self.client_applications:
             client_applications_item = client_applications_item_data.to_dict()
             client_applications.append(client_applications_item)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -41,17 +40,18 @@ class ListClientApplicationsResponse:
             }
         )
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.client_application import ClientApplication
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         client_applications = []
         _client_applications = d.pop("clientApplications")
         for client_applications_item_data in _client_applications:
@@ -67,7 +67,7 @@ class ListClientApplicationsResponse:
         return list_client_applications_response
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

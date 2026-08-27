@@ -1,19 +1,16 @@
-from typing import Any, Callable, Dict, Type, TypeVar, Optional
+from __future__ import annotations
 
-from typing import List
-
+import datetime
+from collections.abc import Callable, Mapping
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+from dateutil.parser import isoparse
 from rfc3339 import rfc3339
 
 from ..types import UNSET
 from ..util.serialization import is_not_none
-
-
-from dateutil.parser import isoparse
-import datetime
-
 
 T = TypeVar("T", bound="AvailableReservation")
 
@@ -34,22 +31,20 @@ class AvailableReservation:
     price: int
     quantum_processor_id: str
     start_time: datetime.datetime
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self, pick_by_predicate: Optional[Callable[[Any], bool]] = is_not_none) -> Dict[str, Any]:
+    def to_dict(self, pick_by_predicate: Callable[[str, Any], bool] | None = is_not_none) -> dict[str, Any]:
         duration = self.duration
 
-        assert self.end_time.tzinfo is not None, "Datetime must have timezone information"
         end_time = rfc3339(self.end_time)
 
         price = self.price
 
         quantum_processor_id = self.quantum_processor_id
 
-        assert self.start_time.tzinfo is not None, "Datetime must have timezone information"
         start_time = rfc3339(self.start_time)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -61,15 +56,16 @@ class AvailableReservation:
             }
         )
 
-        field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
         if pick_by_predicate is not None:
             field_dict = {k: v for k, v in field_dict.items() if pick_by_predicate(v)}
+        else:
+            field_dict = {k: v for k, v in field_dict.items() if v != UNSET}
 
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         duration = d.pop("duration")
 
         end_time = isoparse(d.pop("endTime"))
@@ -92,7 +88,7 @@ class AvailableReservation:
         return available_reservation
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:
