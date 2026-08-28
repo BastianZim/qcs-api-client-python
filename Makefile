@@ -17,7 +17,6 @@ style-check: install-dev
 test: install-dev
 	poetry run pytest tests
 
-
 docs: install-dev
 	poetry run $(MAKE) -C docs html
 
