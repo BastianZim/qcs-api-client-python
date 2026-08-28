@@ -1,6 +1,6 @@
 [project]
 name = "qcs_api_client"
-version = "0.27.4"
+version = "0.27.5"
 description = "A client library for accessing Rigetti QCS API"
 include = ["qcs_api_client/py.typed"]
 authors = [{ name = "Rigetti QPU Software", email = "qpu-software@rigetti.com" }]
