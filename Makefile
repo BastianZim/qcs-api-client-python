@@ -1,24 +1,19 @@
 PACKAGE_NAME = qcs_api_client
 
-.PHONY: install-dev \
-	style style-check test \
-	docs watch-docs
+.PHONY: style style-check test docs watch-docs
 
-install-dev:
-	poetry install --with dev
+style:
+	uv run --group dev ruff format .
+	uv run --group dev ruff check --fix .
 
-style: install-dev
-	poetry run ruff format .
-	poetry run ruff check --fix .
+style-check:
+	uv run --group dev ruff check --diff .
 
-style-check: install-dev
-	poetry run ruff check --diff .
+test:
+	uv run --group dev pytest tests
 
-test: install-dev
-	poetry run pytest tests
-
-docs: install-dev
-	poetry run $(MAKE) -C docs html
+docs:
+	uv run --group docs $(MAKE) -C docs html
 
 watch-docs: install-dev
 	sphinx-autobuild docs docs/_build/html

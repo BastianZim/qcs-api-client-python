@@ -1,6 +1,6 @@
 [project]
 name = "qcs_api_client"
-version = "0.27.5"
+version = "0.27.6"
 description = "A client library for accessing Rigetti QCS API"
 include = ["qcs_api_client/py.typed"]
 authors = [{ name = "Rigetti QPU Software", email = "qpu-software@rigetti.com" }]
@@ -35,18 +35,16 @@ docs = [
     "myst-parser (>=4.0.1)"
 ]
 
-[tool.poetry]
-packages = [{ include = "qcs_api_client" }]
+[tool.uv.build-backend]
+module-name = "qcs_api_client"
+module-root = ""
 
-[tool.poetry.group.dev]
-optional = true
+[tool.uv]
+default-groups = []
 
-[tool.poetry.group.docs]
-optional = true
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
-
+requires = ["uv_build>=0.12.7,<0.13"]
+build-backend = "uv_build"
 
 [tool.ruff]
 line-length = 120
